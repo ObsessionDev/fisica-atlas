@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programma di Fisica</title>
+<style>
+:root {
+  --bg: #f7f6f2; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6a64; --line: #dedbd2;
+  --soft: #efede6; --crit: #1f4fd1; --crit-soft: #dfe7fb;
+  --no: #c4352b; --no-bg: #fbe4e1; --lac: #d1661a; --lac-bg: #fde9d6;
+  --vis: #b58a05; --vis-bg: #fbf1cf; --ok: #2e8540; --ok-bg: #dcf0df;
+  --ghost: #9a988f; --edge: #b9b5a9; --nd: #6b6a64; --nd-bg: #ecebe6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161614; --panel: #201f1c; --ink: #ecebe6; --muted: #a3a198; --line: #3a3934;
+    --soft: #2a2925; --crit: #7fa2ff; --crit-soft: #1e2a4a;
+    --no: #ff7a6e; --no-bg: #3d1f1c; --lac: #ff9f5a; --lac-bg: #3d2a19;
+    --vis: #e9c24a; --vis-bg: #3a3218; --ok: #6fcf7f; --ok-bg: #1d3522; --ghost: #7c7a72; --edge: #5c5a53; --nd: #a3a198; --nd-bg: #2c2b27;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161614; --panel: #201f1c; --ink: #ecebe6; --muted: #a3a198; --line: #3a3934;
+  --soft: #2a2925; --crit: #7fa2ff; --crit-soft: #1e2a4a;
+  --no: #ff7a6e; --no-bg: #3d1f1c; --lac: #ff9f5a; --lac-bg: #3d2a19;
+  --vis: #e9c24a; --vis-bg: #3a3218; --ok: #6fcf7f; --ok-bg: #1d3522; --ghost: #7c7a72; --edge: #5c5a53; --nd: #a3a198; --nd-bg: #2c2b27;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif; }
+nav { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+nav .in { max-width: 1180px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 18px; align-items: center; overflow-x: auto; }
+nav b { white-space: nowrap; }
+nav a { color: var(--muted); text-decoration: none; white-space: nowrap; font-size: 14px; }
+nav a:hover { color: var(--ink); }
+main { max-width: 1180px; margin: 0 auto; padding: 8px 16px 80px; }
+h1 { font-size: 28px; margin: 28px 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 21px; margin: 44px 0 10px; letter-spacing: -0.01em; }
+h3 { font-size: 17px; margin: 0; }
+.sub { color: var(--muted); margin: 0 0 18px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin: 14px 0; }
+.tabwrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: 12.5px; text-transform: uppercase; letter-spacing: .03em; }
+code { background: var(--soft); padding: 1px 5px; border-radius: 4px; font-size: .92em; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13.5px; color: var(--muted); margin: 6px 0 4px; }
+.qleg { margin: 10px 0 6px; } .qleg i { font-style: normal; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 14px; height: 14px; border-radius: 4px; border: 2px solid; display: inline-block; }
+.st-no { --c: var(--no); --cb: var(--no-bg); } .st-lac { --c: var(--lac); --cb: var(--lac-bg); }
+.st-vis { --c: var(--vis); --cb: var(--vis-bg); } .st-ok { --c: var(--ok); --cb: var(--ok-bg); }
+.st-nd { --c: var(--nd); --cb: var(--nd-bg); }
+.sw.st-no, .sw.st-lac, .sw.st-vis, .sw.st-ok, .sw.st-nd { border-color: var(--c); background: var(--cb); }
+.sw.crit { border: 3px solid var(--crit); background: transparent; }
+.sw.ghost { border: 2px dashed var(--ghost); background: transparent; }
+.diagwrap { height: 60vh; border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
+  overflow: hidden; touch-action: none; cursor: grab; }
+.diagwrap:active { cursor: grabbing; }
+.dhead { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.zoom { display: flex; gap: 6px; flex-shrink: 0; }
+.zoom .chip { min-width: 34px; }
+svg.diag { display: block; width: 100%; height: 100%; user-select: none; }
+svg.diag rect.banda { fill: transparent; }
+svg.diag rect.banda.alt { fill: var(--soft); }
+svg.diag text.banda-t { font-size: 13px; font-weight: 700; fill: var(--muted); }
+svg.diag .node { cursor: pointer; }
+svg.diag .node text { font-size: 12.5px; fill: var(--ink); pointer-events: none; }
+svg.diag .node text.id { font-weight: 700; font-size: 11.5px; }
+svg.diag .node rect.b { stroke-width: 2; }
+svg.diag .node rect.halo { fill: none; stroke: var(--crit); stroke-width: 3; }
+svg.diag .node.ghost rect { fill: var(--panel); stroke: var(--ghost); stroke-dasharray: 4 3; }
+svg.diag .node.ghost text { fill: var(--ghost); }
+svg.diag path.e { fill: none; stroke: var(--edge); stroke-width: 1.5; }
+svg.diag path.e.crit { stroke: var(--crit); stroke-width: 3.2; }
+svg.diag.focus .node:not(.on), svg.diag.focus path.e:not(.on) { opacity: .15; }
+svg.diag.focus path.e.on { stroke: var(--ink); stroke-width: 2.2; }
+svg.diag.focus path.e.on.crit { stroke: var(--crit); stroke-width: 3.2; }
+.info { min-height: 48px; font-size: 14px; color: var(--muted); margin-top: 10px; }
+.info b { color: var(--ink); }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0 4px; }
+.filters .lbl { color: var(--muted); font-size: 13px; margin-right: 2px; }
+.chip { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px;
+  padding: 4px 11px; font-size: 13px; cursor: pointer; font: inherit; font-size: 13px; }
+.chip[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
+.chip.on-crit[aria-pressed="true"] { border-color: var(--crit); background: var(--crit-soft); }
+.cap h3 { display: flex; gap: 10px; align-items: baseline; }
+.cap h3 .n { color: var(--muted); font-weight: 600; }
+.cap .intro p { margin: 6px 0 10px; color: var(--muted); font-size: 14px; }
+.pill { display: inline-block; min-width: 22px; text-align: center; font-weight: 700; font-size: 12px;
+  border-radius: 6px; padding: 1px 6px; background: var(--soft); }
+.pill.S { background: var(--ink); color: var(--bg); }
+.pill.A { border: 1.5px solid var(--ink); }
+.pill.C { color: var(--muted); }
+.stato { display: inline-block; border-radius: 6px; padding: 1px 7px; font-size: 12.5px; white-space: nowrap;
+  color: var(--c); background: var(--cb); font-weight: 600; }
+td.id { font-weight: 700; white-space: nowrap; }
+tr.crit td.id { color: var(--crit); }
+tr.crit td.id::after { content: " ●"; font-size: 10px; vertical-align: middle; }
+a.dep { color: var(--muted); text-decoration: none; border-bottom: 1px dotted var(--muted); margin-right: 5px; white-space: nowrap; }
+a.dep:hover { color: var(--ink); }
+tr:target td { background: var(--crit-soft); }
+.hidden { display: none; }
+.bar { display: inline-flex; width: 110px; height: 9px; border-radius: 5px; overflow: hidden; background: var(--soft); vertical-align: middle; margin-right: 8px; }
+.bar i { display: block; height: 100%; background: var(--c); }
+.prog { white-space: nowrap; font-size: 13px; color: var(--muted); }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; font-size: 14px; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; }
+.vuoto { color: var(--muted); font-style: italic; }
+.verdetto { margin-top: 12px; font-size: 15px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 800px) { .two { grid-template-columns: 1fr; } h1 { font-size: 23px; } }
+</style>
+</head>
+<body>
+<nav><div class="in"><b>Fisica</b>
+  <a href="#piano" id="navPiano" class="hidden">Piano</a><a href="#quadro">Quadro</a><a href="#percorsi">Percorsi</a><a href="#capitoli">Capitoli</a>
+  <a href="#ordine">Ordine di studio</a><a href="#tempo">Tempo</a></div></nav>
+<main>
+  <h1>Programma di Fisica</h1>
+  <p class="sub" id="sub"></p>
+
+  <section id="piano" class="hidden"><h2>Il tuo piano</h2><div class="card" id="pianoBox"></div></section>
+
+  <section id="quadro"><h2>Quadro d'insieme</h2><div class="card" id="quadroBox"></div></section>
+
+  <section id="percorsi">
+    <h2>Percorsi di studio</h2>
+    <p class="sub">Solo argomenti S e A. Le frecce vanno dal prerequisito all'argomento che ne dipende.
+      Ogni fascia è un capitolo; da sinistra a destra, l'ordine in cui si possono studiare. Sono disegnate solo le dipendenze dirette.<br>Pizzico o ⌘ + rotella per lo zoom, due dita o trascinamento per spostarti. Clicca un riquadro per vedere tutto ciò che richiede e tutto ciò che sblocca.</p>
+    <div class="legend">
+      <span><i class="sw st-no"></i>mai studiato</span><span><i class="sw st-lac"></i>lacuna confermata</span>
+      <span><i class="sw st-vis"></i>visto una volta</span><span><i class="sw st-ok"></i>verificato</span><span><i class="sw st-nd"></i>da valutare</span>
+      <span><i class="sw crit"></i>percorso critico</span><span><i class="sw ghost"></i>prerequisito da un altro blocco o di priorità B</span>
+    </div>
+    <div id="diagrammi"></div>
+  </section>
+
+  <section id="capitoli">
+    <h2>Capitoli</h2>
+    <div class="filters" id="filtri"></div>
+    <div id="capBox"></div>
+  </section>
+
+  <section id="ordine"><h2>Ordine di studio consigliato</h2><div class="card" id="ordineBox"></div></section>
+  <section id="tempo"><h2>Il conto del tempo</h2><div class="card" id="tempoBox"></div></section>
+</main>
+
+<script>
+const D = __DATI__;
+const BY = Object.fromEntries(D.argomenti.map(a => [a.id, a]));
+const ST = { "✖": ["st-no", "mai studiato"], "⚠": ["st-lac", "lacuna"], "◐": ["st-vis", "visto una volta"], "✓": ["st-ok", "verificato"], "?": ["st-nd", "da valutare"] };
+const LEZ = D.argomenti.some(a => a.lezione);
+const CRIT = new Set(D.blocchi.flatMap(b => b.critico));
+const NS = "http://www.w3.org/2000/svg";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const cmpId = (a, b) => { const [x1, y1] = a.split(".").map(Number), [x2, y2] = b.split(".").map(Number); return x1 - x2 || y1 - y2; };
+
+document.getElementById("sub").textContent =
+  `${D.data ? `Aggiornato il ${D.data} · ` : ""}${D.capitoli.length} capitoli · ${D.argomenti.length} argomenti · fonte: PROGRAMMA.md`;
+document.getElementById("quadroBox").innerHTML = D.quadro;
+{
+  const q = document.getElementById("quadroBox");
+  q.querySelectorAll("td").forEach(td => {
+    const s = td.textContent.trim();
+    if (ST[s]) td.innerHTML = `<span class="stato ${ST[s][0]}">${s} ${ST[s][1]}</span>`;
+    else if (/^(S|A|B|C)$/.test(s)) td.innerHTML = `<span class="pill ${s}">${s}</span>`;
+  });
+  const leg = document.createElement("div");
+  leg.className = "legend qleg";
+  leg.innerHTML = `<span><b>Stato</b></span>` + Object.entries(ST).map(([k, [c, t]]) => `<span class="stato ${c}">${k} ${t}</span>`).join("") +
+    `<span style="margin-left:12px"><b>Priorità</b></span><span><i class="pill S">S</i> esce quasi sempre, va saputo fare</span>
+     <span><i class="pill A">A</i> uscito o candidato forte</span><span><i class="pill B">B</i> raro, basta definizione e formula</span>
+     <span><i class="pill C">C</i> cultura</span>`;
+  q.querySelector(".tabwrap").after(leg);
+  // colonna calcolata: avanzamento per capitolo, dagli stati degli argomenti
+  const tab = q.querySelector("table");
+  tab.querySelector("thead tr").insertAdjacentHTML("beforeend", "<th>Avanzamento</th>");
+  tab.querySelectorAll("tbody tr").forEach(tr => {
+    const n = tr.cells[0].textContent.trim();
+    const args = /^\d+$/.test(n) ? D.argomenti.filter(a => a.cap === +n) : [];
+    if (!args.length) return tr.insertAdjacentHTML("beforeend", "<td></td>");
+    const segs = Object.keys(ST).filter(k => k !== "?").map(k => [k, args.filter(a => a.stato === k).length]);
+    const ok = args.filter(a => a.stato === "✓").length;
+    tr.insertAdjacentHTML("beforeend", `<td class="prog"><span class="bar">${segs.filter(x => x[1])
+      .map(([k, c]) => `<i class="${ST[k][0]}" style="width:${100 * c / args.length}%"></i>`).join("")}</span>✓ ${ok}/${args.length}</td>`);
+  });
+}
+
+/* ---------- Il tuo piano: dal Profilo di PROGRAMMA.md ---------- */
+{
+  const P = D.profilo || {};
+  if (Object.keys(P).length) {
+    document.getElementById("piano").classList.remove("hidden");
+    document.getElementById("navPiano").classList.remove("hidden");
+    const data = t => { const m = /(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(t || ""); return m ? new Date(+m[3], m[2] - 1, +m[1]) : null; };
+    const num = t => { const m = /\d+(?:[.,]\d+)?/.exec(t || ""); return m ? parseFloat(m[0].replace(",", ".")) : null; };
+    const campi = Object.entries(P).map(([k, v]) =>
+      `<dt>${esc(k)}</dt><dd>${v ? esc(v) : '<span class="vuoto">da compilare — chiedilo al tuo agente</span>'}</dd>`).join("");
+    // ore di studio che restano: ore del capitolo divise per peso della priorità, scalate per stato
+    const PESO = { S: 3, A: 2, B: 1, C: 0.3 }, RESTA = { "✓": 0, "◐": 0.5, "⚠": 0.8, "✖": 1, "?": 1 };
+    const incluse = new Set((P["Priorità incluse"] || "S, A, B, C").match(/[SABC]/g));
+    let studio = 0;
+    for (const c of D.capitoli) {
+      const args = D.argomenti.filter(a => a.cap === c.n), tot = args.reduce((s, a) => s + PESO[a.p], 0);
+      if (c.ore && tot) for (const a of args) if (incluse.has(a.p)) studio += c.ore * PESO[a.p] / tot * RESTA[a.stato];
+    }
+    const extra = num(P["Ore extra (teoria e simulazioni)"]) || 0, serve = studio + extra;
+    const oggi = new Date(); oggi.setHours(0, 0, 0, 0);
+    const inizio = data(P["Inizio"]) && data(P["Inizio"]) > oggi ? data(P["Inizio"]) : oggi;
+    const esame = data(P["Appello"]), h = num(P["Ore al giorno"]);
+    let v = `Servono circa <b>${Math.round(serve)} h</b>: ${Math.round(studio)} di studio (priorità ${[...incluse].join(", ")}, al netto di quello già fatto) + ${extra} di teoria e simulazioni.`;
+    if (esame && h) {
+      const giorni = Math.max(0, Math.round((esame - inizio) / 864e5)), disp = giorni * h;
+      const ok = disp >= serve;
+      v += `<br>Da ${inizio.toLocaleDateString("it-IT")} all'appello ci sono <b>${giorni} giorni</b> × ${h} h = <b>${Math.round(disp)} h</b>.
+        <span class="stato ${ok ? "st-ok" : "st-no"}">${ok ? `margine di ${Math.round(disp - serve)} h` : `mancano ${Math.round(serve - disp)} h`}</span>`;
+      if (!ok) v += `<br>Servirebbero ${Math.ceil(serve / Math.max(giorni, 1))} h al giorno, oppure escludere le priorità più basse.`;
+    } else v += `<br><span class="vuoto">Compila Appello e Ore al giorno per il confronto con il tempo disponibile.</span>`;
+    document.getElementById("pianoBox").innerHTML = `<dl class="kv">${campi}</dl><p class="verdetto">${v}</p>`;
+  }
+}
+document.getElementById("ordineBox").innerHTML = D.ordine;
+document.getElementById("tempoBox").innerHTML = D.tempo;
+
+/* ---------- Diagrammi: una fascia per capitolo, colonne = ordine di studio ---------- */
+function grafo(blocco) {
+  const caps = new Set(blocco.fasce.flatMap(f => f[1]).filter(c => c !== 0));
+  const shown = new Set(D.argomenti.filter(a => "SA".includes(a.p) && caps.has(a.cap)).map(a => a.id));
+  // capitolo 0: si include solo quello che serve, con la sua chiusura interna
+  let cresce = true;
+  while (cresce) {
+    cresce = false;
+    for (const id of [...shown]) for (const d of BY[id].dip)
+      if (BY[d].cap === 0 && !shown.has(d)) { shown.add(d); cresce = true; }
+  }
+  const ghost = new Set(), tutti = [];
+  for (const id of shown) for (const d of BY[id].dip) {
+    if (!shown.has(d)) ghost.add(d);
+    tutti.push([d, id]);
+  }
+  // riduzione transitiva: A→C non si disegna se c'è già A→…→C
+  const succ = {};
+  for (const [a, b] of tutti) (succ[a] = succ[a] || []).push(b);
+  const raggiunge = (da, a, salta) => {
+    const vis = new Set(), st = (succ[da] || []).filter(x => x !== salta);
+    while (st.length) {
+      const x = st.pop();
+      if (x === a) return true;
+      if (vis.has(x)) continue;
+      vis.add(x); st.push(...(succ[x] || []));
+    }
+    return false;
+  };
+  const edges = tutti.filter(([a, b]) => !raggiunge(a, b, b));
+  return { shown, ghost, edges, tutti };
+}
+
+function layout(g, blocco) {
+  const W = 150, H = 46, CW = 214, RH = 60, LBL = 170, PAD = 16, M = 16;
+  const nodes = [...g.shown, ...g.ghost];
+  const crit = new Set(blocco.critico);
+  const preds = Object.fromEntries(nodes.map(n => [n, []]));
+  const succ = Object.fromEntries(nodes.map(n => [n, []]));
+  for (const [a, b] of g.edges) { preds[b].push(a); succ[a].push(b); }
+  // colonna = quanto presto si può studiare (cammino più lungo dai prerequisiti)
+  const C = {};
+  const col = n => {
+    if (C[n] !== undefined) return C[n];
+    const rp = preds[n].filter(p => g.shown.has(p));
+    return (C[n] = Math.max(preds[n].some(p => g.ghost.has(p)) ? 1 : 0, ...rp.map(p => col(p) + 1)));
+  };
+  [...g.shown].forEach(col);
+  // fuori dal percorso critico: il più vicino possibile a chi lo usa, frecce più corte
+  for (const n of [...g.shown].sort((a, b) => C[b] - C[a]))
+    if (!crit.has(n) && succ[n].length) C[n] = Math.max(C[n], Math.min(...succ[n].map(s => C[s])) - 1);
+  for (const n of g.ghost) C[n] = Math.min(...succ[n].map(s => C[s])) - 1;
+  // fasce: quelle del blocco, più una in cima per i prerequisiti da altri capitoli
+  const fasce = blocco.fasce.map(([nome, caps]) => ({ nome, caps }));
+  const esterni = { nome: "Da altri capitoli", caps: [] };
+  const fasciaDi = n => fasce.find(f => f.caps.includes(BY[n].cap)) || esterni;
+  const tutte = [esterni, ...fasce];
+  const gruppi = new Map(); // fascia -> colonna -> [nodi]
+  for (const n of nodes) {
+    const f = fasciaDi(n);
+    if (!gruppi.has(f)) gruppi.set(f, {});
+    (gruppi.get(f)[C[n]] = gruppi.get(f)[C[n]] || []).push(n);
+  }
+  const usate = tutte.filter(f => gruppi.has(f));
+  for (const f of usate) for (const c in gruppi.get(f)) gruppi.get(f)[c].sort(cmpId);
+  const Y = {}, X = {}, bande = [];
+  const posiziona = () => {
+    let top = M;
+    bande.length = 0;
+    for (const f of usate) {
+      const gr = gruppi.get(f);
+      const righe = Math.max(...Object.values(gr).map(l => l.length));
+      const h = (righe - 1) * RH + H + 2 * PAD;
+      for (const c in gr) gr[c].forEach((n, i) => { Y[n] = top + PAD + i * RH; X[n] = LBL + c * CW; });
+      bande.push({ nome: f.nome, top, h });
+      top += h;
+    }
+    return top;
+  };
+  posiziona();
+  // dentro ogni fascia, ordina i nodi della stessa colonna verso i loro vicini
+  for (let it = 0; it < 8; it++) {
+    for (const f of usate) for (const c in gruppi.get(f)) {
+      const l = gruppi.get(f)[c];
+      const b = Object.fromEntries(l.map(n => {
+        const nb = [...preds[n], ...succ[n]];
+        return [n, nb.length ? nb.reduce((s, x) => s + Y[x], 0) / nb.length : Y[n]];
+      }));
+      // il percorso critico resta sulla prima riga della fascia: linea blu più dritta
+      l.sort((x, y) => (crit.has(y) - crit.has(x)) || (b[x] - b[y]));
+    }
+    posiziona();
+  }
+  const height = posiziona() + M;
+  const width = LBL + (Math.max(...nodes.map(n => C[n])) + 1) * CW - (CW - W) + M;
+  return { X, Y, W, H, width, height, bande, LBL, preds, succ };
+}
+
+/* zoom e spostamento: pizzico / ⌘+rotella per lo zoom, due dita o trascinamento per spostarsi */
+function panZoom(svg, wrap, W, H) {
+  let x = 0, y = 0, k = 1, mosso = false;
+  const applica = () => svg.setAttribute("viewBox", `${x} ${y} ${wrap.clientWidth / k} ${wrap.clientHeight / k}`);
+  const adatta = () => {
+    k = Math.min(wrap.clientWidth / W, wrap.clientHeight / H, 1.2);
+    x = -(wrap.clientWidth / k - W) / 2; y = -(wrap.clientHeight / k - H) / 2; applica();
+  };
+  const zoom = (f, cx, cy) => { // cx, cy: punto fermo in pixel del riquadro
+    const nk = Math.min(4, Math.max(0.15, k * f));
+    x += cx / k - cx / nk; y += cy / k - cy / nk; k = nk; applica();
+  };
+  wrap.addEventListener("wheel", e => {
+    e.preventDefault();
+    const r = wrap.getBoundingClientRect();
+    if (e.ctrlKey || e.metaKey) zoom(Math.exp(-e.deltaY * 0.01), e.clientX - r.left, e.clientY - r.top);
+    else { x += e.deltaX / k; y += e.deltaY / k; applica(); }
+  }, { passive: false });
+  const pt = new Map();
+  let ultimo = null;
+  wrap.addEventListener("pointerdown", e => {
+    pt.set(e.pointerId, [e.clientX, e.clientY]); mosso = false; ultimo = null;
+  });
+  wrap.addEventListener("pointermove", e => {
+    if (!pt.has(e.pointerId)) return;
+    const [px, py] = pt.get(e.pointerId);
+    if (pt.size === 1) {
+      const dx = e.clientX - px, dy = e.clientY - py;
+      if (!mosso && Math.hypot(dx, dy) < 4) return;
+      if (!mosso) wrap.setPointerCapture(e.pointerId);
+      mosso = true; x -= dx / k; y -= dy / k; applica();
+    } else if (pt.size === 2) {
+      const [a, b] = [...pt.values()];
+      const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+      if (ultimo) {
+        const r = wrap.getBoundingClientRect();
+        zoom(d / ultimo, (a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top);
+      }
+      ultimo = d; mosso = true;
+    }
+    pt.set(e.pointerId, [e.clientX, e.clientY]);
+  });
+  const fine = e => { pt.delete(e.pointerId); ultimo = null; };
+  wrap.addEventListener("pointerup", fine);
+  wrap.addEventListener("pointercancel", fine);
+  // dopo un trascinamento il clic non conta
+  wrap.addEventListener("click", e => { if (mosso) { e.stopPropagation(); mosso = false; } }, true);
+  new ResizeObserver(() => applica()).observe(wrap);
+  // altezza del riquadro: quella del diagramma a larghezza piena, entro il 68% dello schermo
+  const dimensiona = () => {
+    const k0 = Math.min(wrap.clientWidth / W, 1.2);
+    wrap.style.height = `${Math.round(Math.min(Math.max(H * k0 + 8, 220), innerHeight * 0.68))}px`;
+    adatta();
+  };
+  return {
+    adatta, dimensiona,
+    piu: () => zoom(1.25, wrap.clientWidth / 2, wrap.clientHeight / 2),
+    meno: () => zoom(0.8, wrap.clientWidth / 2, wrap.clientHeight / 2),
+  };
+}
+
+function disegna(blocco) {
+  const g = grafo(blocco), P = layout(g, blocco);
+  const crit = new Set(blocco.critico);
+  const svg = document.createElementNS(NS, "svg");
+  svg.classList.add("diag");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", `Grafo delle dipendenze: ${blocco.titolo}`);
+  const el = (tag, attrs, parent = svg) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    parent.appendChild(e); return e;
+  };
+  const gB = el("g", {}), gE = el("g", {}), gN = el("g", {});
+  P.bande.forEach((b, i) => {
+    el("rect", { x: 0, y: b.top, width: P.width, height: b.h, class: "banda" + (i % 2 ? " alt" : "") }, gB);
+    const t = el("text", { x: 14, y: b.top + 26, class: "banda-t" }, gB);
+    t.textContent = b.nome;
+  });
+  const occupato = (id, a, b) => Object.keys(P.X).some(n => n !== a && n !== b &&
+    Math.abs(P.Y[n] - P.Y[id]) < 1 && P.X[n] > P.X[a] && P.X[n] < P.X[b]);
+  const pathEls = [];
+  for (const [a, b] of g.edges) {
+    const sx = P.X[a] + P.W, sy = P.Y[a] + P.H / 2, tx = P.X[b], ty = P.Y[b] + P.H / 2;
+    const dx = Math.max(40, (tx - sx) / 2);
+    let d = `M${sx},${sy} C${sx + dx},${sy} ${tx - dx},${ty} ${tx},${ty}`;
+    // freccia lunga sulla stessa riga con riquadri in mezzo: passa sopra
+    if (Math.abs(sy - ty) < 1 && occupato(a, a, b)) {
+      const up = sy - P.H / 2 - 22;
+      d = `M${sx},${sy} C${sx + 30},${sy} ${sx + 10},${up} ${sx + 50},${up} L${tx - 50},${up} C${tx - 10},${up} ${tx - 30},${ty} ${tx},${ty}`;
+    }
+    const isC = crit.has(a) && crit.has(b);
+    const p = el("path", { d, class: "e" + (isC ? " crit" : "") }, gE);
+    p.dataset.a = a; p.dataset.b = b;
+    pathEls.push(p);
+  }
+  pathEls.filter(p => p.classList.contains("crit")).forEach(p => gE.appendChild(p));
+  const nodeEls = {};
+  for (const id in P.X) {
+    const a = BY[id], ghost = g.ghost.has(id);
+    const cls = ["node", ghost ? "ghost" : "", !ghost && crit.has(id) ? "crit" : ""].join(" ");
+    const gg = el("g", { class: cls, transform: `translate(${P.X[id]},${P.Y[id]})`, tabindex: 0 }, gN);
+    const sc = ST[a.stato][0].slice(3);
+    if (!ghost && crit.has(id)) el("rect", { class: "halo", x: -4, y: -4, width: P.W + 8, height: P.H + 8, rx: 11 }, gg);
+    const r = el("rect", { class: "b", width: P.W, height: P.H, rx: 8 }, gg);
+    if (!ghost) { r.style.fill = `var(--${sc}-bg)`; r.style.stroke = `var(--${sc})`; }
+    const t1 = el("text", { x: 9, y: 18, class: "id" }, gg);
+    t1.textContent = ghost ? `${id} · cap ${a.cap}` : `${id} · ${a.p}`;
+    if (!ghost) el("circle", { cx: P.W - 12, cy: 13, r: 4.5 }, gg).style.fill = `var(--${sc})`;
+    el("text", { x: 9, y: 36 }, gg).textContent = a.breve;
+    el("title", {}, gg).textContent = `${id} — ${a.testo.replace(/\*\*/g, "")}`;
+    nodeEls[id] = gg;
+    gg.addEventListener("click", ev => { ev.stopPropagation(); focus(id); });
+    gg.addEventListener("keydown", ev => { if (ev.key === "Enter") focus(id); });
+  }
+  const box = document.createElement("div");
+  box.className = "card";
+  box.innerHTML = `<div class="dhead"><div><h3>${esc(blocco.titolo)}</h3>
+    <p class="sub" style="margin:4px 0 10px">${esc(blocco.nota)}</p></div>
+    <div class="zoom"><button class="chip" data-z="meno" aria-label="Riduci">−</button>
+    <button class="chip" data-z="piu" aria-label="Ingrandisci">+</button>
+    <button class="chip" data-z="adatta">Adatta</button></div></div>`;
+  const wrap = document.createElement("div");
+  wrap.className = "diagwrap"; wrap.appendChild(svg);
+  const info = document.createElement("div");
+  info.className = "info"; info.textContent = "Clicca un riquadro per i dettagli.";
+  box.append(wrap, info);
+  const pz = panZoom(svg, wrap, P.width, P.height);
+  box.querySelectorAll("[data-z]").forEach(b => b.addEventListener("click", () => pz[b.dataset.z]()));
+  requestAnimationFrame(pz.dimensiona);
+  // prerequisiti e sblocchi: sul grafo completo, non su quello ridotto
+  const fullP = {}, fullS = {};
+  for (const [a, b] of g.tutti) { (fullP[b] = fullP[b] || []).push(a); (fullS[a] = fullS[a] || []).push(b); }
+  let current = null;
+  function reach(id, nb) {
+    const out = new Set([id]), st = [id];
+    while (st.length) for (const x of nb[st.pop()] || []) if (!out.has(x)) { out.add(x); st.push(x); }
+    return out;
+  }
+  function focus(id) {
+    if (current === id) return clear();
+    current = id;
+    const pre = reach(id, fullP), post = reach(id, fullS), on = new Set([...pre, ...post]);
+    svg.classList.add("focus");
+    for (const n in nodeEls) nodeEls[n].classList.toggle("on", on.has(n));
+    for (const p of pathEls) p.classList.toggle("on",
+      (pre.has(p.dataset.a) && pre.has(p.dataset.b)) || (post.has(p.dataset.a) && post.has(p.dataset.b)));
+    const a = BY[id];
+    info.innerHTML = `<b>${id} — ${a.html}</b><br>Priorità ${a.p} · <span class="stato ${ST[a.stato][0]}">${esc(a.stato_testo)}</span>
+      · esce: ${esc(a.slot)}${a.lezione ? ` · lezione: ${esc(a.lezione)}` : ""}<br>Richiede ${pre.size - 1} argomenti, ne sblocca ${post.size - 1}.
+      <a href="#r-${id}">Vai alla riga ↓</a>`;
+  }
+  function clear() {
+    current = null; svg.classList.remove("focus");
+    info.textContent = "Clicca un riquadro per i dettagli.";
+  }
+  svg.addEventListener("click", clear);
+  return box;
+}
+const dBox = document.getElementById("diagrammi");
+D.blocchi.forEach(b => dBox.appendChild(disegna(b)));
+
+/* ---------- Tabelle per capitolo con filtri ---------- */
+const filtro = { p: new Set(["S", "A", "B", "C"]), s: new Set(Object.keys(ST)), crit: false };
+const fBox = document.getElementById("filtri");
+function chips(label, items, set, fmt) {
+  const s = document.createElement("span"); s.className = "lbl"; s.textContent = label; fBox.appendChild(s);
+  for (const it of items) {
+    const b = document.createElement("button"); b.className = "chip"; b.setAttribute("aria-pressed", "true");
+    b.innerHTML = fmt(it);
+    b.onclick = () => { set.has(it) ? set.delete(it) : set.add(it); b.setAttribute("aria-pressed", set.has(it)); applica(); };
+    fBox.appendChild(b);
+  }
+}
+chips("Priorità", ["S", "A", "B", "C"], filtro.p, x => `<span class="pill ${x}">${x}</span>`);
+chips("Stato", Object.keys(ST), filtro.s, x => `${x} ${ST[x][1]}`);
+const cb = document.createElement("button"); cb.className = "chip on-crit"; cb.setAttribute("aria-pressed", "false");
+cb.textContent = "● solo percorso critico";
+cb.onclick = () => { filtro.crit = !filtro.crit; cb.setAttribute("aria-pressed", filtro.crit); applica(); };
+fBox.appendChild(cb);
+
+const capBox = document.getElementById("capBox");
+for (const c of D.capitoli) {
+  const args = D.argomenti.filter(a => a.cap === c.n);
+  const sec = document.createElement("div");
+  sec.className = "card cap"; sec.id = `cap-${c.n}`;
+  sec.innerHTML = `<h3><span class="n">Cap ${c.n}</span>${esc(c.titolo)}</h3><div class="intro">${c.intro_html}</div>
+  <div class="tabwrap"><table><thead><tr><th>ID</th><th>Argomento</th><th>P</th><th>Dipende da</th><th>Esce</th><th>Stato</th>${LEZ ? "<th>Lezione</th>" : ""}</tr></thead><tbody>
+  ${args.map(a => `<tr id="r-${a.id}" data-p="${a.p}" data-s="${a.stato}" class="${CRIT.has(a.id) ? "crit" : ""}">
+    <td class="id">${a.id}</td><td>${a.html}</td><td><span class="pill ${a.p}">${a.p}</span></td>
+    <td>${a.dip.length ? a.dip.map(d => `<a class="dep" href="#r-${d}">${d}</a>`).join("") : "—"}
+      ${/\(/.test(a.dip_testo) ? `<br><small>${esc(a.dip_testo.replace(/^[^(]*/, ""))}</small>` : ""}</td>
+    <td>${esc(a.slot)}</td><td><span class="stato ${ST[a.stato][0]}">${esc(a.stato_testo)}</span></td>${LEZ ? `<td>${esc(a.lezione)}</td>` : ""}</tr>`).join("")}
+  </tbody></table></div>`;
+  capBox.appendChild(sec);
+}
+function applica() {
+  for (const sec of capBox.children) {
+    let vis = 0;
+    for (const tr of sec.querySelectorAll("tbody tr")) {
+      const ok = filtro.p.has(tr.dataset.p) && filtro.s.has(tr.dataset.s) && (!filtro.crit || tr.classList.contains("crit"));
+      tr.classList.toggle("hidden", !ok); vis += ok;
+    }
+    sec.classList.toggle("hidden", !vis);
+  }
+}
+</script>
+</body>
+</html>

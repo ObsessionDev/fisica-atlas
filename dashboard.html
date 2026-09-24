@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Programma di Fisica</title>
+<style>
+:root {
+  --bg: #f7f6f2; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6a64; --line: #dedbd2;
+  --soft: #efede6; --crit: #1f4fd1; --crit-soft: #dfe7fb;
+  --no: #c4352b; --no-bg: #fbe4e1; --lac: #d1661a; --lac-bg: #fde9d6;
+  --vis: #b58a05; --vis-bg: #fbf1cf; --ok: #2e8540; --ok-bg: #dcf0df;
+  --ghost: #9a988f; --edge: #b9b5a9; --nd: #6b6a64; --nd-bg: #ecebe6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161614; --panel: #201f1c; --ink: #ecebe6; --muted: #a3a198; --line: #3a3934;
+    --soft: #2a2925; --crit: #7fa2ff; --crit-soft: #1e2a4a;
+    --no: #ff7a6e; --no-bg: #3d1f1c; --lac: #ff9f5a; --lac-bg: #3d2a19;
+    --vis: #e9c24a; --vis-bg: #3a3218; --ok: #6fcf7f; --ok-bg: #1d3522; --ghost: #7c7a72; --edge: #5c5a53; --nd: #a3a198; --nd-bg: #2c2b27;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161614; --panel: #201f1c; --ink: #ecebe6; --muted: #a3a198; --line: #3a3934;
+  --soft: #2a2925; --crit: #7fa2ff; --crit-soft: #1e2a4a;
+  --no: #ff7a6e; --no-bg: #3d1f1c; --lac: #ff9f5a; --lac-bg: #3d2a19;
+  --vis: #e9c24a; --vis-bg: #3a3218; --ok: #6fcf7f; --ok-bg: #1d3522; --ghost: #7c7a72; --edge: #5c5a53; --nd: #a3a198; --nd-bg: #2c2b27;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+body { margin: 0; background: var(--bg); color: var(--ink);
+  font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif; }
+nav { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+nav .in { max-width: 1180px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 18px; align-items: center; overflow-x: auto; }
+nav b { white-space: nowrap; }
+nav a { color: var(--muted); text-decoration: none; white-space: nowrap; font-size: 14px; }
+nav a:hover { color: var(--ink); }
+main { max-width: 1180px; margin: 0 auto; padding: 8px 16px 80px; }
+h1 { font-size: 28px; margin: 28px 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 21px; margin: 44px 0 10px; letter-spacing: -0.01em; }
+h3 { font-size: 17px; margin: 0; }
+.sub { color: var(--muted); margin: 0 0 18px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin: 14px 0; }
+.tabwrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: 12.5px; text-transform: uppercase; letter-spacing: .03em; }
+code { background: var(--soft); padding: 1px 5px; border-radius: 4px; font-size: .92em; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13.5px; color: var(--muted); margin: 6px 0 4px; }
+.qleg { margin: 10px 0 6px; } .qleg i { font-style: normal; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 14px; height: 14px; border-radius: 4px; border: 2px solid; display: inline-block; }
+.st-no { --c: var(--no); --cb: var(--no-bg); } .st-lac { --c: var(--lac); --cb: var(--lac-bg); }
+.st-vis { --c: var(--vis); --cb: var(--vis-bg); } .st-ok { --c: var(--ok); --cb: var(--ok-bg); }
+.st-nd { --c: var(--nd); --cb: var(--nd-bg); }
+.sw.st-no, .sw.st-lac, .sw.st-vis, .sw.st-ok, .sw.st-nd { border-color: var(--c); background: var(--cb); }
+.sw.crit { border: 3px solid var(--crit); background: transparent; }
+.sw.ghost { border: 2px dashed var(--ghost); background: transparent; }
+.diagwrap { height: 60vh; border: 1px solid var(--line); border-radius: 10px; background: var(--panel);
+  overflow: hidden; touch-action: none; cursor: grab; }
+.diagwrap:active { cursor: grabbing; }
+.dhead { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.zoom { display: flex; gap: 6px; flex-shrink: 0; }
+.zoom .chip { min-width: 34px; }
+svg.diag { display: block; width: 100%; height: 100%; user-select: none; }
+svg.diag rect.banda { fill: transparent; }
+svg.diag rect.banda.alt { fill: var(--soft); }
+svg.diag text.banda-t { font-size: 13px; font-weight: 700; fill: var(--muted); }
+svg.diag .node { cursor: pointer; }
+svg.diag .node text { font-size: 12.5px; fill: var(--ink); pointer-events: none; }
+svg.diag .node text.id { font-weight: 700; font-size: 11.5px; }
+svg.diag .node rect.b { stroke-width: 2; }
+svg.diag .node rect.halo { fill: none; stroke: var(--crit); stroke-width: 3; }
+svg.diag .node.ghost rect { fill: var(--panel); stroke: var(--ghost); stroke-dasharray: 4 3; }
+svg.diag .node.ghost text { fill: var(--ghost); }
+svg.diag path.e { fill: none; stroke: var(--edge); stroke-width: 1.5; }
+svg.diag path.e.crit { stroke: var(--crit); stroke-width: 3.2; }
+svg.diag.focus .node:not(.on), svg.diag.focus path.e:not(.on) { opacity: .15; }
+svg.diag.focus path.e.on { stroke: var(--ink); stroke-width: 2.2; }
+svg.diag.focus path.e.on.crit { stroke: var(--crit); stroke-width: 3.2; }
+.info { min-height: 48px; font-size: 14px; color: var(--muted); margin-top: 10px; }
+.info b { color: var(--ink); }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0 4px; }
+.filters .lbl { color: var(--muted); font-size: 13px; margin-right: 2px; }
+.chip { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px;
+  padding: 4px 11px; font-size: 13px; cursor: pointer; font: inherit; font-size: 13px; }
+.chip[aria-pressed="false"] { opacity: .45; text-decoration: line-through; }
+.chip.on-crit[aria-pressed="true"] { border-color: var(--crit); background: var(--crit-soft); }
+.cap h3 { display: flex; gap: 10px; align-items: baseline; }
+.cap h3 .n { color: var(--muted); font-weight: 600; }
+.cap .intro p { margin: 6px 0 10px; color: var(--muted); font-size: 14px; }
+.pill { display: inline-block; min-width: 22px; text-align: center; font-weight: 700; font-size: 12px;
+  border-radius: 6px; padding: 1px 6px; background: var(--soft); }
+.pill.S { background: var(--ink); color: var(--bg); }
+.pill.A { border: 1.5px solid var(--ink); }
+.pill.C { color: var(--muted); }
+.stato { display: inline-block; border-radius: 6px; padding: 1px 7px; font-size: 12.5px; white-space: nowrap;
+  color: var(--c); background: var(--cb); font-weight: 600; }
+td.id { font-weight: 700; white-space: nowrap; }
+tr.crit td.id { color: var(--crit); }
+tr.crit td.id::after { content: " ●"; font-size: 10px; vertical-align: middle; }
+a.dep { color: var(--muted); text-decoration: none; border-bottom: 1px dotted var(--muted); margin-right: 5px; white-space: nowrap; }
+a.dep:hover { color: var(--ink); }
+tr:target td { background: var(--crit-soft); }
+.hidden { display: none; }
+.bar { display: inline-flex; width: 110px; height: 9px; border-radius: 5px; overflow: hidden; background: var(--soft); vertical-align: middle; margin-right: 8px; }
+.bar i { display: block; height: 100%; background: var(--c); }
+.prog { white-space: nowrap; font-size: 13px; color: var(--muted); }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; font-size: 14px; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; }
+.vuoto { color: var(--muted); font-style: italic; }
+.verdetto { margin-top: 12px; font-size: 15px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 800px) { .two { grid-template-columns: 1fr; } h1 { font-size: 23px; } }
+</style>
+</head>
+<body>
+<nav><div class="in"><b>Fisica</b>
+  <a href="#piano" id="navPiano" class="hidden">Piano</a><a href="#quadro">Quadro</a><a href="#percorsi">Percorsi</a><a href="#capitoli">Capitoli</a>
+  <a href="#ordine">Ordine di studio</a><a href="#tempo">Tempo</a></div></nav>
+<main>
+  <h1>Programma di Fisica</h1>
+  <p class="sub" id="sub"></p>
+
+  <section id="piano" class="hidden"><h2>Il tuo piano</h2><div class="card" id="pianoBox"></div></section>
+
+  <section id="quadro"><h2>Quadro d'insieme</h2><div class="card" id="quadroBox"></div></section>
+
+  <section id="percorsi">
+    <h2>Percorsi di studio</h2>
+    <p class="sub">Solo argomenti S e A. Le frecce vanno dal prerequisito all'argomento che ne dipende.
+      Ogni fascia è un capitolo; da sinistra a destra, l'ordine in cui si possono studiare. Sono disegnate solo le dipendenze dirette.<br>Pizzico o ⌘ + rotella per lo zoom, due dita o trascinamento per spostarti. Clicca un riquadro per vedere tutto ciò che richiede e tutto ciò che sblocca.</p>
+    <div class="legend">
+      <span><i class="sw st-no"></i>mai studiato</span><span><i class="sw st-lac"></i>lacuna confermata</span>
+      <span><i class="sw st-vis"></i>visto una volta</span><span><i class="sw st-ok"></i>verificato</span><span><i class="sw st-nd"></i>da valutare</span>
+      <span><i class="sw crit"></i>percorso critico</span><span><i class="sw ghost"></i>prerequisito da un altro blocco o di priorità B</span>
+    </div>
+    <div id="diagrammi"></div>
+  </section>
+
+  <section id="capitoli">
+    <h2>Capitoli</h2>
+    <div class="filters" id="filtri"></div>
+    <div id="capBox"></div>
+  </section>
+
+  <section id="ordine"><h2>Ordine di studio consigliato</h2><div class="card" id="ordineBox"></div></section>
+  <section id="tempo"><h2>Il conto del tempo</h2><div class="card" id="tempoBox"></div></section>
+</main>
+
+<script>
+const D = {"capitoli": [{"n": 0, "titolo": "Strumenti matematici", "ore": 2.0, "intro_html": "<p>Richiamo mirato a quello che serve in elettromagnetismo.<\/p>"}, {"n": 1, "titolo": "Cinematica del punto", "ore": 1.5, "intro_html": ""}, {"n": 2, "titolo": "Dinamica del punto", "ore": 4.0, "intro_html": ""}, {"n": 3, "titolo": "Sistemi di punti e corpo rigido", "ore": 7.0, "intro_html": "<p>Il cluster più frequente di E1 (rotolamento + carrucola 3/8). Da sapere a memoria: momenti d'inerzia dei corpi standard e vincolo v = ωR.<\/p>"}, {"n": 4, "titolo": "Fluidi", "ore": 2.5, "intro_html": "<p>Piccolo, autonomo, due teorie già uscite. Buon rapporto resa/ore.<\/p>"}, {"n": 5, "titolo": "Termodinamica", "ore": 8.0, "intro_html": "<p>6 punti <strong>a ogni esame<\/strong> (E2 in 8 scritti su 8), sempre lo stesso schema. Da sapere a memoria: lavoro, calore ed entropia per ogni tipo di trasformazione, relazioni dell'adiabatica. Trappola già vista: adiabatica = isoentropica <strong>solo se reversibile<\/strong>.<\/p>"}, {"n": 6, "titolo": "Elettrostatica nel vuoto", "ore": 8.0, "intro_html": ""}, {"n": 7, "titolo": "Correnti (campi lentamente variabili)", "ore": 3.0, "intro_html": "<p>Il cuore è la parte \"di campo\" (J, forma locale, circuitazione), non solo i circuiti.<\/p>"}, {"n": 8, "titolo": "Magnetismo e induzione", "ore": 9.0, "intro_html": "<p>Il capitolo che pesa di più sulla teoria E/M.<\/p>"}, {"n": 9, "titolo": "Equazioni di Maxwell e onde", "ore": 4.0, "intro_html": ""}, {"n": 10, "titolo": "Campo elettrico nella materia", "ore": 3.0, "intro_html": ""}, {"n": 11, "titolo": "Campo magnetico nella materia", "ore": 3.0, "intro_html": ""}], "argomenti": [{"id": "0.1", "cap": 0, "testo": "Vettori: componenti, prodotto scalare e vettoriale, derivata di un vettore", "p": "S", "dip": [], "dip_testo": "—", "slot": "tutto", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Vettori", "html": "Vettori: componenti, prodotto scalare e vettoriale, derivata di un vettore"}, {"id": "0.2", "cap": 0, "testo": "Coordinate polari, cilindriche, sferiche; elementi dl, dS, dV (dV = 4πr²dr, dV = 2πrL dr)", "p": "S", "dip": ["0.1"], "dip_testo": "0.1", "slot": "E3, E1 (momenti d'inerzia)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Coordinate e dV", "html": "Coordinate polari, cilindriche, sferiche; elementi dl, dS, dV (dV = 4πr²dr, dV = 2πrL dr)"}, {"id": "0.3", "cap": 0, "testo": "EDO lineari: 1° ordine (RC, RL), 2° ordine omogenee e forzate, metodo dei complessi", "p": "S", "dip": [], "dip_testo": "—", "slot": "E3, T-EM, T-MT", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "EDO lineari", "html": "EDO lineari: 1° ordine (RC, RL), 2° ordine omogenee e forzate, metodo dei complessi"}, {"id": "0.4", "cap": 0, "testo": "Integrali di linea e di superficie; flusso e circuitazione di un campo", "p": "S", "dip": ["0.2"], "dip_testo": "0.2", "slot": "E3, T-EM", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Flusso e circuitazione", "html": "Integrali di linea e di superficie; flusso e circuitazione di un campo"}, {"id": "0.5", "cap": 0, "testo": "Gradiente, divergenza, rotore; **teorema della divergenza** (disp. §6), **teorema di Stokes / della circuitazione** (disp. §7)", "p": "S", "dip": ["0.4"], "dip_testo": "0.4", "slot": "T-EM (FEM/Stokes 1/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Div, rot, Stokes", "html": "Gradiente, divergenza, rotore; <strong>teorema della divergenza<\/strong> (disp. §6), <strong>teorema di Stokes / della circuitazione<\/strong> (disp. §7)"}, {"id": "1.1", "cap": 1, "testo": "Posizione, spostamento, velocità e accelerazione medie e istantanee; moto uniforme e uniformemente accelerato, equazioni orarie, grafici", "p": "A", "dip": ["0.1"], "dip_testo": "0.1", "slot": "E1", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Moti rettilinei", "html": "Posizione, spostamento, velocità e accelerazione medie e istantanee; moto uniforme e uniformemente accelerato, equazioni orarie, grafici"}, {"id": "1.2", "cap": 1, "testo": "Moto dei gravi, proiettile", "p": "B", "dip": ["1.1"], "dip_testo": "1.1", "slot": "E1", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Moto dei gravi, proietti", "html": "Moto dei gravi, proiettile"}, {"id": "1.3", "cap": 1, "testo": "Moto circolare; velocità e accelerazione angolare; accelerazione tangenziale e normale; **raggio di curvatura**; moto vario", "p": "A", "dip": ["1.1"], "dip_testo": "1.1", "slot": "E1 (2/8 \"cinematica con calcolo\")", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Moto circolare", "html": "Moto circolare; velocità e accelerazione angolare; accelerazione tangenziale e normale; <strong>raggio di curvatura<\/strong>; moto vario"}, {"id": "1.4", "cap": 1, "testo": "Moto nel piano in coordinate polari, **accelerazione di Coriolis** (disp. §1)", "p": "A", "dip": ["1.3", "0.2"], "dip_testo": "1.3, 0.2", "slot": "T-MT candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Polari, Coriolis", "html": "Moto nel piano in coordinate polari, <strong>accelerazione di Coriolis<\/strong> (disp. §1)"}, {"id": "1.5", "cap": 1, "testo": "Moto armonico (cinematica)", "p": "B", "dip": ["1.3"], "dip_testo": "1.3", "slot": "—", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Moto armonico", "html": "Moto armonico (cinematica)"}, {"id": "1.6", "cap": 1, "testo": "Moti relativi, trasformazioni di Galileo", "p": "B", "dip": ["1.1"], "dip_testo": "1.1", "slot": "—", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Moti relativi", "html": "Moti relativi, trasformazioni di Galileo"}, {"id": "1.7", "cap": 1, "testo": "Galileo, metodo scientifico, principio di inerzia e di relatività, grandezze fisiche", "p": "C", "dip": [], "dip_testo": "—", "slot": "—", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Galileo, metodo scientif", "html": "Galileo, metodo scientifico, principio di inerzia e di relatività, grandezze fisiche"}, {"id": "2.1", "cap": 2, "testo": "Leggi di Newton, forze di vincolo, peso, principio di equivalenza", "p": "S", "dip": ["1.1"], "dip_testo": "1.1", "slot": "E1", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Newton, vincoli", "html": "Leggi di Newton, forze di vincolo, peso, principio di equivalenza"}, {"id": "2.2", "cap": 2, "testo": "Attrito statico e dinamico, piano inclinato", "p": "S", "dip": ["2.1"], "dip_testo": "2.1", "slot": "E1 (2/8 \"punto con attrito/vincoli\")", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Attrito", "html": "Attrito statico e dinamico, piano inclinato"}, {"id": "2.3", "cap": 2, "testo": "Forza elastica, moto armonico semplice; soluzione per **serie di potenze** (disp. §2)", "p": "A", "dip": ["2.1", "0.3"], "dip_testo": "2.1, 0.3", "slot": "T-MT candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Moto armonico", "html": "Forza elastica, moto armonico semplice; soluzione per <strong>serie di potenze<\/strong> (disp. §2)"}, {"id": "2.4", "cap": 2, "testo": "Pendolo semplice (piccole oscillazioni)", "p": "B", "dip": ["2.3"], "dip_testo": "2.3", "slot": "—", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Pendolo semplice", "html": "Pendolo semplice (piccole oscillazioni)"}, {"id": "2.5", "cap": 2, "testo": "Riferimenti non inerziali, forze apparenti, principio di equivalenza forte", "p": "B", "dip": ["2.1", "1.6"], "dip_testo": "2.1, 1.6", "slot": "—", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Riferimenti non inerzial", "html": "Riferimenti non inerziali, forze apparenti, principio di equivalenza forte"}, {"id": "2.6", "cap": 2, "testo": "Lavoro, **potenza**, teorema dell'energia cinetica", "p": "S", "dip": ["2.1", "0.4"], "dip_testo": "2.1, 0.4", "slot": "E1 (potenza costante)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Lavoro, potenza", "html": "Lavoro, <strong>potenza<\/strong>, teorema dell'energia cinetica"}, {"id": "2.7", "cap": 2, "testo": "Forze conservative, energia potenziale (peso, gravitazione, elastica), conservazione dell'energia meccanica", "p": "S", "dip": ["2.6"], "dip_testo": "2.6", "slot": "E1", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Energia meccanica", "html": "Forze conservative, energia potenziale (peso, gravitazione, elastica), conservazione dell'energia meccanica"}, {"id": "2.8", "cap": 2, "testo": "Momento di una forza, momento angolare, momento assiale, teorema del momento angolare e conservazione", "p": "S", "dip": ["2.1", "0.1"], "dip_testo": "2.1, 0.1", "slot": "E1 (1/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Momento angolare", "html": "Momento di una forza, momento angolare, momento assiale, teorema del momento angolare e conservazione"}, {"id": "2.9", "cap": 2, "testo": "Gravitazione universale, **orbite**, Keplero, velocità areolare, **velocità di fuga**, forza centrale conservativa", "p": "A", "dip": ["2.7", "2.8"], "dip_testo": "2.7, 2.8", "slot": "T-MT (1/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Gravitazione, orbite", "html": "Gravitazione universale, <strong>orbite<\/strong>, Keplero, velocità areolare, <strong>velocità di fuga<\/strong>, forza centrale conservativa"}, {"id": "2.10", "cap": 2, "testo": "**Oscillatore smorzato**: sotto-critico, critico, sovra-critico (disp. §3)", "p": "A", "dip": ["2.3", "0.3"], "dip_testo": "2.3, 0.3", "slot": "T-MT (1/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Oscillatore smorzato", "html": "<strong>Oscillatore smorzato<\/strong>: sotto-critico, critico, sovra-critico (disp. §3)"}, {"id": "2.11", "cap": 2, "testo": "Oscillazioni forzate, numeri complessi, risonanza (disp. §4)", "p": "A", "dip": ["2.10"], "dip_testo": "2.10", "slot": "T-MT candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Oscillazioni forzate", "html": "Oscillazioni forzate, numeri complessi, risonanza (disp. §4)"}, {"id": "3.1", "cap": 3, "testo": "Centro di massa e suo moto, quantità di moto del sistema, **I equazione cardinale**, conservazione di p", "p": "A", "dip": ["2.1"], "dip_testo": "2.1", "slot": "E1", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Centro di massa", "html": "Centro di massa e suo moto, quantità di moto del sistema, <strong>I equazione cardinale<\/strong>, conservazione di p"}, {"id": "3.2", "cap": 3, "testo": "**II equazione cardinale**, conservazione del momento angolare nei sistemi", "p": "S", "dip": ["3.1", "2.8"], "dip_testo": "3.1, 2.8", "slot": "E1, T-MT", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "II cardinale", "html": "<strong>II equazione cardinale<\/strong>, conservazione del momento angolare nei sistemi"}, {"id": "3.3", "cap": 3, "testo": "Teorema dell'energia cinetica nei sistemi, **teorema di König** (K e L), energia potenziale e conservazione per sistemi", "p": "S", "dip": ["3.1", "3.2", "2.7"], "dip_testo": "3.1, 3.2, 2.7", "slot": "T-MT (1/8), E1", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "König", "html": "Teorema dell'energia cinetica nei sistemi, <strong>teorema di König<\/strong> (K e L), energia potenziale e conservazione per sistemi"}, {"id": "3.4", "cap": 3, "testo": "**Urti** centrali, elastici e anelastici; **pendolo balistico**", "p": "A", "dip": ["3.1", "2.7", "3.2"], "dip_testo": "3.1, 2.7 (3.2 se il bersaglio ruota)", "slot": "T-MT (1/8, luglio 2026)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Urti, p. balistico", "html": "<strong>Urti<\/strong> centrali, elastici e anelastici; <strong>pendolo balistico<\/strong>"}, {"id": "3.5", "cap": 3, "testo": "**Momento d'inerzia** di corpi estesi (asta, anello, disco, cilindro, sfera), Huygens-Steiner, assi perpendicolari", "p": "S", "dip": ["3.2", "0.2"], "dip_testo": "3.2, 0.2", "slot": "E1", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Momento d'inerzia", "html": "<strong>Momento d'inerzia<\/strong> di corpi estesi (asta, anello, disco, cilindro, sfera), Huygens-Steiner, assi perpendicolari"}, {"id": "3.6", "cap": 3, "testo": "Dinamica del corpo rigido: rotazione ad asse fisso, τ = Iα, L = Iω, lavoro del momento, K di rotazione; **carrucole massive**, Atwood", "p": "S", "dip": ["3.5"], "dip_testo": "3.5", "slot": "E1 (3/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Corpo rigido, carrucole", "html": "Dinamica del corpo rigido: rotazione ad asse fisso, τ = Iα, L = Iω, lavoro del momento, K di rotazione; <strong>carrucole massive<\/strong>, Atwood"}, {"id": "3.7", "cap": 3, "testo": "Statica, sistemi equivalenti di forze, coppia di forze", "p": "B", "dip": ["3.6"], "dip_testo": "3.6", "slot": "—", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Statica, sistemi equival", "html": "Statica, sistemi equivalenti di forze, coppia di forze"}, {"id": "3.8", "cap": 3, "testo": "Pendolo composto", "p": "B", "dip": ["3.6", "2.3"], "dip_testo": "3.6, 2.3", "slot": "—", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Pendolo composto", "html": "Pendolo composto"}, {"id": "3.9", "cap": 3, "testo": "**Rotolamento puro**: vincolo v = ωR, attrito statico, metodo energetico e dinamico; effetto giroscopico", "p": "S", "dip": ["3.6", "3.3"], "dip_testo": "3.6, 3.3", "slot": "E1 (3/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Rotolamento puro", "html": "<strong>Rotolamento puro<\/strong>: vincolo v = ωR, attrito statico, metodo energetico e dinamico; effetto giroscopico"}, {"id": "4.1", "cap": 4, "testo": "Pressione e sua isotropia; equazione della statica dei fluidi (forze conservative, fluidi pesanti)", "p": "A", "dip": ["2.1", "2.7"], "dip_testo": "2.1, 2.7", "slot": "T-MT", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Statica dei fluidi", "html": "Pressione e sua isotropia; equazione della statica dei fluidi (forze conservative, fluidi pesanti)"}, {"id": "4.2", "cap": 4, "testo": "**Stevino**, atmosfera isoterma, paradosso idrostatico, **Pascal**, pressa idraulica, misura delle pressioni", "p": "A", "dip": ["4.1"], "dip_testo": "4.1", "slot": "T-MT (1/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Stevino, Pascal", "html": "<strong>Stevino<\/strong>, atmosfera isoterma, paradosso idrostatico, <strong>Pascal<\/strong>, pressa idraulica, misura delle pressioni"}, {"id": "4.3", "cap": 4, "testo": "**Archimede**, misura delle densità", "p": "A", "dip": ["4.2"], "dip_testo": "4.2", "slot": "T-MT (stessa domanda)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Archimede", "html": "<strong>Archimede<\/strong>, misura delle densità"}, {"id": "4.4", "cap": 4, "testo": "Dinamica: conservazione della massa (**continuità**), **Bernoulli** con esempi", "p": "A", "dip": ["4.1", "2.6"], "dip_testo": "4.1, 2.6", "slot": "T-MT (1/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Continuità, Bernoulli", "html": "Dinamica: conservazione della massa (<strong>continuità<\/strong>), <strong>Bernoulli<\/strong> con esempi"}, {"id": "5.1", "cap": 5, "testo": "Principio zero, temperatura, termometri", "p": "B", "dip": [], "dip_testo": "—", "slot": "—", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Principio zero", "html": "Principio zero, temperatura, termometri"}, {"id": "5.2", "cap": 5, "testo": "Calore, capacità termica, calori specifici, **calorimetria**, equivalente meccanico della caloria", "p": "A", "dip": ["5.1"], "dip_testo": "5.1", "slot": "E2 (2/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Calorimetria", "html": "Calore, capacità termica, calori specifici, <strong>calorimetria<\/strong>, equivalente meccanico della caloria"}, {"id": "5.3", "cap": 5, "testo": "Trasmissione del calore: conduzione, convezione, irraggiamento", "p": "C", "dip": ["5.2"], "dip_testo": "5.2", "slot": "—", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Trasmissione del calore:", "html": "Trasmissione del calore: conduzione, convezione, irraggiamento"}, {"id": "5.4", "cap": 5, "testo": "Sistemi termodinamici, variabili di stato intensive/estensive, trasformazioni quasi statiche, **reversibili e irreversibili**, lavoro nelle reversibili", "p": "S", "dip": ["5.1", "2.6"], "dip_testo": "5.1, 2.6", "slot": "E2", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Rev. e irreversibili", "html": "Sistemi termodinamici, variabili di stato intensive/estensive, trasformazioni quasi statiche, <strong>reversibili e irreversibili<\/strong>, lavoro nelle reversibili"}, {"id": "5.5", "cap": 5, "testo": "**I principio**, energia interna come funzione di stato", "p": "S", "dip": ["5.4"], "dip_testo": "5.4", "slot": "E2", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "I principio", "html": "<strong>I principio<\/strong>, energia interna come funzione di stato"}, {"id": "5.6", "cap": 5, "testo": "Gas perfetti: equazione di stato, R, Dalton; energia interna (esperienza di Joule); c_V, c_p, Mayer, γ mono/biatomico", "p": "S", "dip": ["5.5"], "dip_testo": "5.5", "slot": "E2", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Gas perfetti", "html": "Gas perfetti: equazione di stato, R, Dalton; energia interna (esperienza di Joule); c_V, c_p, Mayer, γ mono/biatomico"}, {"id": "5.7", "cap": 5, "testo": "**Trasformazioni**: isocora, isobara, isoterma, **adiabatica** (pV^γ, TV^(γ−1), T^γ p^(1−γ)), politropica e suo calore specifico — Q, L, ΔU di ognuna", "p": "S", "dip": ["5.6"], "dip_testo": "5.6", "slot": "E2", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Trasformazioni", "html": "<strong>Trasformazioni<\/strong>: isocora, isobara, isoterma, <strong>adiabatica<\/strong> (pV^γ, TV^(γ−1), T^γ p^(1−γ)), politropica e suo calore specifico — Q, L, ΔU di ognuna"}, {"id": "5.8", "cap": 5, "testo": "**Cicli**: bilancio Q/L/ΔU per tratto, rendimento, macchine frigorifere e COP", "p": "S", "dip": ["5.7"], "dip_testo": "5.7", "slot": "E2 (6/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Cicli, rendimento", "html": "<strong>Cicli<\/strong>: bilancio Q/L/ΔU per tratto, rendimento, macchine frigorifere e COP"}, {"id": "5.9", "cap": 5, "testo": "Teoria cinetica: pressione cinetica, interpretazione cinetica di T, equipartizione, dipendenza di c_V da T", "p": "B", "dip": ["5.6"], "dip_testo": "5.6", "slot": "—", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Teoria cinetica: pressio", "html": "Teoria cinetica: pressione cinetica, interpretazione cinetica di T, equipartizione, dipendenza di c_V da T"}, {"id": "5.10", "cap": 5, "testo": "**II principio**: Kelvin-Planck, Clausius, **equivalenza dei due enunciati**", "p": "S", "dip": ["5.8"], "dip_testo": "5.8", "slot": "T-MT (1/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "II principio", "html": "<strong>II principio<\/strong>: Kelvin-Planck, Clausius, <strong>equivalenza dei due enunciati<\/strong>"}, {"id": "5.11", "cap": 5, "testo": "Ciclo di Carnot, **teorema di Carnot**, temperatura termodinamica", "p": "S", "dip": ["5.10"], "dip_testo": "5.10", "slot": "T-MT (1/8), E2", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Carnot", "html": "Ciclo di Carnot, <strong>teorema di Carnot<\/strong>, temperatura termodinamica"}, {"id": "5.12", "cap": 5, "testo": "Integrale di Clausius, **disuguaglianza di Clausius**, entropia come funzione di stato, entropia nei sistemi isolati", "p": "S", "dip": ["5.11"], "dip_testo": "5.11", "slot": "T-MT candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Clausius, entropia", "html": "Integrale di Clausius, <strong>disuguaglianza di Clausius<\/strong>, entropia come funzione di stato, entropia nei sistemi isolati"}, {"id": "5.13", "cap": 5, "testo": "**ΔS nei calcoli**: gas perfetto per ogni trasformazione, **tratti irreversibili** (percorso reversibile equivalente), **sorgenti**, ΔS dell'universo", "p": "S", "dip": ["5.12", "5.7"], "dip_testo": "5.12, 5.7", "slot": "E2 (ΔS 3/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "ΔS e irreversibili", "html": "<strong>ΔS nei calcoli<\/strong>: gas perfetto per ogni trasformazione, <strong>tratti irreversibili<\/strong> (percorso reversibile equivalente), <strong>sorgenti<\/strong>, ΔS dell'universo"}, {"id": "5.14", "cap": 5, "testo": "Entropia e disordine, interpretazione statistica, entropia e informazione, III principio", "p": "C", "dip": ["5.12"], "dip_testo": "5.12", "slot": "—", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Entropia e disordine, in", "html": "Entropia e disordine, interpretazione statistica, entropia e informazione, III principio"}, {"id": "6.1", "cap": 6, "testo": "Carica, elettroscopio, **Coulomb**, ε₀, campo E, sovrapposizione", "p": "S", "dip": ["0.1"], "dip_testo": "0.1", "slot": "E3", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Coulomb, campo E", "html": "Carica, elettroscopio, <strong>Coulomb<\/strong>, ε₀, campo E, sovrapposizione"}, {"id": "6.2", "cap": 6, "testo": "**Distribuzioni continue**: anello (asse), disco, **bacchetta finita** (disp. §5), filo infinito, piano infinito", "p": "S", "dip": ["6.1", "0.4"], "dip_testo": "6.1, 0.4", "slot": "E3 (2/8), T-EM candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Distribuzioni continue", "html": "<strong>Distribuzioni continue<\/strong>: anello (asse), disco, <strong>bacchetta finita<\/strong> (disp. §5), filo infinito, piano infinito"}, {"id": "6.3", "cap": 6, "testo": "Flusso, **teorema di Gauss**, simmetria sferica/cilindrica/piana, anche **ρ(r) non uniforme**", "p": "S", "dip": ["6.1", "0.2", "0.4"], "dip_testo": "6.1, 0.2, 0.4", "slot": "E3 (2/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Gauss", "html": "Flusso, <strong>teorema di Gauss<\/strong>, simmetria sferica/cilindrica/piana, anche <strong>ρ(r) non uniforme<\/strong>"}, {"id": "6.4", "cap": 6, "testo": "Teorema della divergenza, **I equazione di Maxwell** in forma integrale e differenziale", "p": "S", "dip": ["6.3", "0.5"], "dip_testo": "6.3, 0.5", "slot": "T-EM candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "I Maxwell", "html": "Teorema della divergenza, <strong>I equazione di Maxwell<\/strong> in forma integrale e differenziale"}, {"id": "6.5", "cap": 6, "testo": "Conservatività di E, **potenziale** (carica, anello, da E con integrale di linea), energia elettrostatica di un sistema di cariche", "p": "S", "dip": ["6.1", "2.7"], "dip_testo": "6.1, 2.7", "slot": "E3", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Potenziale", "html": "Conservatività di E, <strong>potenziale<\/strong> (carica, anello, da E con integrale di linea), energia elettrostatica di un sistema di cariche"}, {"id": "6.6", "cap": 6, "testo": "**Dipolo**: potenziale, campo in cartesiane e polari, momento ed energia di un dipolo in campo esterno", "p": "B", "dip": ["6.5"], "dip_testo": "6.5", "slot": "serve a 10", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Dipolo", "html": "<strong>Dipolo<\/strong>: potenziale, campo in cartesiane e polari, momento ed energia di un dipolo in campo esterno"}, {"id": "6.7", "cap": 6, "testo": "Quadrupolo, **sviluppo in multipoli** (disp. §8)", "p": "B", "dip": ["6.6"], "dip_testo": "6.6", "slot": "T-EM candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Quadrupolo, sviluppo in", "html": "Quadrupolo, <strong>sviluppo in multipoli<\/strong> (disp. §8)"}, {"id": "6.8", "cap": 6, "testo": "**Conduttori** in equilibrio: proprietà, gabbia di Faraday, effetto delle punte, forza su conduttori carichi, coefficienti di potenziale e di induzione", "p": "A", "dip": ["6.3", "6.5"], "dip_testo": "6.3, 6.5", "slot": "E3", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Conduttori", "html": "<strong>Conduttori<\/strong> in equilibrio: proprietà, gabbia di Faraday, effetto delle punte, forza su conduttori carichi, coefficienti di potenziale e di induzione"}, {"id": "6.9", "cap": 6, "testo": "**Capacità**: conduttore isolato, condensatore piano e sferico, serie e parallelo", "p": "A", "dip": ["6.8"], "dip_testo": "6.8", "slot": "E3, serve a 7.4, 9.1", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Capacità", "html": "<strong>Capacità<\/strong>: conduttore isolato, condensatore piano e sferico, serie e parallelo"}, {"id": "6.10", "cap": 6, "testo": "Energia del condensatore, **densità di energia del campo** (caso piano e caso generale, disp. §9)", "p": "A", "dip": ["6.9"], "dip_testo": "6.9", "slot": "T-EM candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Energia del campo E", "html": "Energia del condensatore, <strong>densità di energia del campo<\/strong> (caso piano e caso generale, disp. §9)"}, {"id": "7.1", "cap": 7, "testo": "Densità e intensità di corrente, **equazione di continuità**", "p": "A", "dip": ["6.1"], "dip_testo": "6.1", "slot": "serve a 9.1", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Corrente, continuità", "html": "Densità e intensità di corrente, <strong>equazione di continuità<\/strong>"}, {"id": "7.2", "cap": 7, "testo": "Legge di Ohm (anche locale J = σE), resistenza, resistività, potenza, effetto Joule, serie e parallelo", "p": "A", "dip": ["7.1", "6.5"], "dip_testo": "7.1, 6.5", "slot": "E3", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Ohm, Joule", "html": "Legge di Ohm (anche locale J = σE), resistenza, resistività, potenza, effetto Joule, serie e parallelo"}, {"id": "7.3", "cap": 7, "testo": "**Forza elettromotrice**, circuitazione di E, generatori, Kirchhoff — FEM vs ddp", "p": "S", "dip": ["7.2", "0.5"], "dip_testo": "7.2, 0.5", "slot": "T-EM (1/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "FEM, Kirchhoff", "html": "<strong>Forza elettromotrice<\/strong>, circuitazione di E, generatori, Kirchhoff — FEM vs ddp"}, {"id": "7.4", "cap": 7, "testo": "**Carica e scarica del condensatore (RC)**, bilancio energetico", "p": "S", "dip": ["7.3", "6.10", "0.3"], "dip_testo": "7.3, 6.10, 0.3", "slot": "E3 (RC/RL 2/8), T-EM (1/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Circuito RC", "html": "<strong>Carica e scarica del condensatore (RC)<\/strong>, bilancio energetico"}, {"id": "8.1", "cap": 8, "testo": "Campo B, **forza di Lorentz**, moto di una carica in campo uniforme, spettrometro di massa", "p": "A", "dip": ["2.1", "1.3"], "dip_testo": "2.1, 1.3", "slot": "E3", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Lorentz", "html": "Campo B, <strong>forza di Lorentz<\/strong>, moto di una carica in campo uniforme, spettrometro di massa"}, {"id": "8.2", "cap": 8, "testo": "**II formula di Laplace**: forza su un filo, spira in campo uniforme, **momento magnetico**, momento torcente", "p": "A", "dip": ["8.1"], "dip_testo": "8.1", "slot": "serve a 8.4, 11", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "II Laplace", "html": "<strong>II formula di Laplace<\/strong>: forza su un filo, spira in campo uniforme, <strong>momento magnetico<\/strong>, momento torcente"}, {"id": "8.3", "cap": 8, "testo": "**I formula di Laplace (Biot-Savart)**: spira circolare sull'asse, **filo rettilineo**, **solenoide**", "p": "S", "dip": ["7.1", "0.4"], "dip_testo": "7.1, 0.4", "slot": "E3, T-EM", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Biot-Savart", "html": "<strong>I formula di Laplace (Biot-Savart)<\/strong>: spira circolare sull'asse, <strong>filo rettilineo<\/strong>, <strong>solenoide<\/strong>"}, {"id": "8.4", "cap": 8, "testo": "**Azioni tra correnti**, definizione dell'Ampère", "p": "S", "dip": ["8.2", "8.3"], "dip_testo": "8.2, 8.3", "slot": "T-EM (1/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Azioni tra correnti", "html": "<strong>Azioni tra correnti<\/strong>, definizione dell'Ampère"}, {"id": "8.5", "cap": 8, "testo": "Solenoidalità di B (II Maxwell), **legge di Ampère**, anche con J(r)", "p": "S", "dip": ["8.3", "0.5"], "dip_testo": "8.3, 0.5", "slot": "E3 (1/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Ampère", "html": "Solenoidalità di B (II Maxwell), <strong>legge di Ampère<\/strong>, anche con J(r)"}, {"id": "8.6", "cap": 8, "testo": "**Faraday-Neumann-Lenz**: esperienze, fem di movimento (via Lorentz), giustificazione relativistica, circuitazione di E e **III Maxwell**", "p": "S", "dip": ["8.5", "7.3", "8.1"], "dip_testo": "8.5, 7.3, 8.1", "slot": "E3 (filo-spira 1/8), T-EM candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Faraday-Lenz", "html": "<strong>Faraday-Neumann-Lenz<\/strong>: esperienze, fem di movimento (via Lorentz), giustificazione relativistica, circuitazione di E e <strong>III Maxwell<\/strong>"}, {"id": "8.7", "cap": 8, "testo": "Mutua induzione e autoinduzione, **induttanza del solenoide**", "p": "S", "dip": ["8.6", "8.3"], "dip_testo": "8.6, 8.3", "slot": "T-EM (1/8, luglio 2026)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Induttanza", "html": "Mutua induzione e autoinduzione, <strong>induttanza del solenoide<\/strong>"}, {"id": "8.8", "cap": 8, "testo": "**Circuito RL**, energia dell'induttore, **densità di energia del campo B**", "p": "S", "dip": ["8.7", "7.4", "0.3"], "dip_testo": "8.7, 7.4, 0.3", "slot": "E3, T-EM", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "RL, energia di B", "html": "<strong>Circuito RL<\/strong>, energia dell'induttore, <strong>densità di energia del campo B<\/strong>"}, {"id": "8.9", "cap": 8, "testo": "**RLC** e analogia con l'oscillatore smorzato", "p": "A", "dip": ["8.8", "2.10"], "dip_testo": "8.8, 2.10", "slot": "T-EM (1/8, con RC)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "RLC", "html": "<strong>RLC<\/strong> e analogia con l'oscillatore smorzato"}, {"id": "9.1", "cap": 9, "testo": "Limite della legge di Ampère (condensatore in carica), continuità, **corrente di spostamento, Ampère-Maxwell**", "p": "S", "dip": ["8.5", "7.1", "6.9", "6.4"], "dip_testo": "8.5, 7.1, 6.9, 6.4", "slot": "T-EM (2/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Ampère-Maxwell", "html": "Limite della legge di Ampère (condensatore in carica), continuità, <strong>corrente di spostamento, Ampère-Maxwell<\/strong>"}, {"id": "9.2", "cap": 9, "testo": "**Equazioni di Maxwell complete**, forma integrale e differenziale", "p": "S", "dip": ["9.1", "6.4", "8.6"], "dip_testo": "9.1, 6.4, 8.6", "slot": "T-EM", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Maxwell complete", "html": "<strong>Equazioni di Maxwell complete<\/strong>, forma integrale e differenziale"}, {"id": "9.3", "cap": 9, "testo": "Equazione delle onde, soluzione, **onde piane** e sferiche: trasversalità, E ⊥ B, E = cB, c = 1/√(ε₀μ₀)", "p": "A", "dip": ["9.2", "0.5"], "dip_testo": "9.2, 0.5", "slot": "T-EM (1/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Onde piane", "html": "Equazione delle onde, soluzione, <strong>onde piane<\/strong> e sferiche: trasversalità, E ⊥ B, E = cB, c = 1/√(ε₀μ₀)"}, {"id": "9.4", "cap": 9, "testo": "**Vettore di Poynting**, intensità (disp. §13)", "p": "A", "dip": ["9.3", "6.10", "8.8"], "dip_testo": "9.3, 6.10, 8.8", "slot": "T-EM candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Poynting", "html": "<strong>Vettore di Poynting<\/strong>, intensità (disp. §13)"}, {"id": "10.1", "cap": 10, "testo": "Dielettrici: **P**, σ_p = P·n, ρ_p = −∇·P (disp. §10), suscettività, ε_r, vettore **D**, Gauss per D", "p": "A", "dip": ["6.4", "6.6", "6.9"], "dip_testo": "6.4, 6.6, 6.9", "slot": "T-EM candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "P, D, dielettrici", "html": "Dielettrici: <strong>P<\/strong>, σ_p = P·n, ρ_p = −∇·P (disp. §10), suscettività, ε_r, vettore <strong>D<\/strong>, Gauss per D"}, {"id": "10.2", "cap": 10, "testo": "Polarizzazione per **deformazione**, polarizzabilità (disp. §11)", "p": "B", "dip": ["10.1", "6.6"], "dip_testo": "10.1, 6.6", "slot": "T-EM candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Polarizzazione per defor", "html": "Polarizzazione per <strong>deformazione<\/strong>, polarizzabilità (disp. §11)"}, {"id": "10.3", "cap": 10, "testo": "Polarizzazione per **orientamento**, funzione di Langevin (disp. §12.1)", "p": "B", "dip": ["10.1", "6.6"], "dip_testo": "10.1, 6.6", "slot": "T-EM candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Polarizzazione per orien", "html": "Polarizzazione per <strong>orientamento<\/strong>, funzione di Langevin (disp. §12.1)"}, {"id": "11.1", "cap": 11, "testo": "Magnetizzazione **M**, campo **H**, suscettività, μ_r, correnti di magnetizzazione, **Ampère nella materia**", "p": "A", "dip": ["8.5", "8.2"], "dip_testo": "8.5, 8.2", "slot": "T-EM (1/8)", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "M, H, Ampère materia", "html": "Magnetizzazione <strong>M<\/strong>, campo <strong>H<\/strong>, suscettività, μ_r, correnti di magnetizzazione, <strong>Ampère nella materia<\/strong>"}, {"id": "11.2", "cap": 11, "testo": "Diamagnetismo: modello", "p": "B", "dip": ["11.1"], "dip_testo": "11.1", "slot": "T-EM candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Diamagnetismo: modello", "html": "Diamagnetismo: modello"}, {"id": "11.3", "cap": 11, "testo": "**Paramagnetismo**: orientamento, Langevin, legge di Curie (disp. §12.2)", "p": "B", "dip": ["11.1", "10.3"], "dip_testo": "11.1, 10.3", "slot": "T-EM candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Paramagnetismo: orientam", "html": "<strong>Paramagnetismo<\/strong>: orientamento, Langevin, legge di Curie (disp. §12.2)"}, {"id": "11.4", "cap": 11, "testo": "**Ferromagnetismo**: domini di Weiss, campo locale, temperatura di Curie, isteresi (disp. §12.3)", "p": "B", "dip": ["11.3"], "dip_testo": "11.3", "slot": "T-EM candidata", "stato": "?", "stato_testo": "?", "lezione": "", "breve": "Ferromagnetismo: domini", "html": "<strong>Ferromagnetismo<\/strong>: domini di Weiss, campo locale, temperatura di Curie, isteresi (disp. §12.3)"}], "blocchi": [{"id": "mecc", "titolo": "Meccanica", "fasce": [["Strumenti", [0]], ["Cinematica", [1]], ["Dinamica del punto", [2]], ["Sistemi e corpo rigido", [3]], ["Fluidi", [4]]], "critico": ["2.1", "2.7", "2.8", "3.1", "3.2", "3.3", "3.5", "3.6", "3.9"], "nota": "Percorso critico: il corpo rigido, fino al rotolamento — il cluster più frequente dell'esercizio di meccanica (4 scritti su 8)."}, {"id": "termo", "titolo": "Termodinamica", "fasce": [["Termodinamica", [5]]], "critico": ["5.4", "5.5", "5.6", "5.7", "5.8", "5.10", "5.11", "5.12", "5.13"], "nota": "Percorso critico: dalle trasformazioni all'entropia con irreversibili — l'esercizio che esce a ogni esame."}, {"id": "em", "titolo": "Elettromagnetismo", "fasce": [["Strumenti", [0]], ["Elettrostatica", [6]], ["Correnti", [7]], ["Magnetismo e induzione", [8]], ["Maxwell e onde", [9]], ["Materia", [10, 11]]], "critico": ["0.4", "0.5", "6.3", "6.4", "6.5", "6.8", "6.9", "6.10", "7.3", "7.4", "8.3", "8.5", "8.6", "8.7", "8.8", "9.1", "9.2", "9.3", "11.1"], "nota": "Da questa catena passano tutto l'esercizio E/M e tutta la teoria E/M, circa 12 punti su 30."}], "profilo": {"Nome": "", "Appello": "", "Inizio": "", "Ore al giorno": "", "Obiettivo": "", "Priorità incluse": "S, A, B, C", "Ore extra (teoria e simulazioni)": "40"}, "quadro": "<div class=\"tabwrap\"><table><thead><tr><th>Cap<\/th><th>Titolo<\/th><th>Peso all'esame<\/th><th>Priorità<\/th><th>Ore stimate<\/th><\/tr><\/thead><tbody><tr><td>0<\/td><td>Strumenti matematici<\/td><td>trasversale (E3, T-EM)<\/td><td>S<\/td><td>2<\/td><\/tr><tr><td>1<\/td><td>Cinematica del punto<\/td><td>E1 (2/8)<\/td><td>A<\/td><td>1,5<\/td><\/tr><tr><td>2<\/td><td>Dinamica del punto<\/td><td>E1, T-MT (2/8)<\/td><td>S<\/td><td>4<\/td><\/tr><tr><td>3<\/td><td>Sistemi e corpo rigido<\/td><td>E1 (4/8), T-MT (2/8)<\/td><td><strong>S<\/strong><\/td><td>7<\/td><\/tr><tr><td>4<\/td><td>Fluidi<\/td><td>T-MT (2/8)<\/td><td>A<\/td><td>2,5<\/td><\/tr><tr><td>5<\/td><td>Termodinamica<\/td><td><strong>E2 (8/8)<\/strong>, T-MT (2/8)<\/td><td><strong>S<\/strong><\/td><td>8<\/td><\/tr><tr><td>6<\/td><td>Elettrostatica nel vuoto<\/td><td>E3 (4/8)<\/td><td><strong>S<\/strong><\/td><td>8<\/td><\/tr><tr><td>7<\/td><td>Correnti<\/td><td>E3 (2/8), T-EM (2/8)<\/td><td>S<\/td><td>3<\/td><\/tr><tr><td>8<\/td><td>Magnetismo e induzione<\/td><td>E3 (2/8), T-EM (3/8)<\/td><td><strong>S<\/strong><\/td><td>9<\/td><\/tr><tr><td>9<\/td><td>Equazioni di Maxwell e onde<\/td><td>T-EM (3/8)<\/td><td>S<\/td><td>4<\/td><\/tr><tr><td>10<\/td><td>Campo elettrico nella materia<\/td><td>T-EM (candidata)<\/td><td>A<\/td><td>3<\/td><\/tr><tr><td>11<\/td><td>Campo magnetico nella materia<\/td><td>T-EM (1/8)<\/td><td>A<\/td><td>3<\/td><\/tr><tr><td><\/td><td><strong>Totale<\/strong><\/td><td><\/td><td><\/td><td><strong>≈ 55 h<\/strong><\/td><\/tr><\/tbody><\/table><\/div>\n<p>Le ore sono di studio + 1–2 esercizi per capitolo, senza carte di teoria e simulazioni. Sono una stima per chi parte da zero: la pagina le scala in base al proprio stato (sezione \"Il tuo piano\").<\/p>\n<p><strong>Dove stanno i punti<\/strong> (30 in tutto):<\/p>\n<ul>\n<li>Cap 6–11 (elettromagnetismo): <strong>≈ 12 punti<\/strong> — tutto E3 + tutta T-EM.<\/li>\n<li>Cap 5 (termo): <strong>6–9 punti<\/strong> — E2 ogni volta, a volte anche la teoria.<\/li>\n<li>Cap 1–4 (meccanica e fluidi): <strong>6–9 punti<\/strong> — E1 + a volte la teoria.<\/li>\n<\/ul>", "ordine": "<p>Topologico (nessun argomento prima dei suoi prerequisiti), poi per priorità. Da adattare al proprio stato: chi ha già basi solide in un capitolo lo verifica e passa oltre.<\/p>\n<ol>\n<li><strong>Autovalutazione<\/strong> — segnare lo stato di ogni argomento (con l'agente, ~30 min). Senza, il piano è una stima.<\/li>\n<li><strong>Termodinamica<\/strong> — 5.4–5.8, poi 5.10–5.13. ~8 h. Rende 6 punti a ogni esame con uno schema sempre uguale.<\/li>\n<li><strong>Catena E/M, parte statica<\/strong> — 0.4–0.5 → 6.1–6.5 → 6.8–6.10 → 7.1–7.4. ~11 h.<\/li>\n<li><strong>Catena E/M, parte magnetica<\/strong> — 8.1–8.8 → 9.1–9.3. ~12 h. Qui nascono 5 delle 8 teorie E/M uscite.<\/li>\n<li><strong>Corpo rigido<\/strong> — 3.5, 3.6, 3.9, poi 3.2–3.4. ~6 h. È il cluster più frequente di E1.<\/li>\n<li><strong>Teorie A a basso costo<\/strong> — 11.1, 8.9, 9.4, 10.1, 4.1–4.4, 2.9, 2.10, 5.10–5.12.<\/li>\n<li><strong>B e C<\/strong> solo se avanza tempo: 6.6–6.7, 10.2–10.3, 11.2–11.4, 2.3 (serie di potenze), 2.11, 1.4.<\/li>\n<\/ol>\n<p>I due rami (meccanica/termo ed E/M) sono indipendenti: si possono alternare, un blocco al giorno per ramo.<\/p>", "tempo": "<ul>\n<li>Studio S + A da zero: ≈ 45 h. Tutto il programma: ≈ 55 h.<\/li>\n<li>Teoria: una scheda per ogni domanda già uscita o candidata (una trentina), ≈ 1 h l'una tra stesura e prova a tempo.<\/li>\n<li>Simulazioni d'esame a tempo, con correzione: ≈ 4–5 h l'una, almeno 3.<\/li>\n<li>Il campo \"Ore extra (teoria e simulazioni)\" del Profilo vale 40 h di default: si cambia a piacere.<\/li>\n<li>La sezione \"Il tuo piano\" della pagina fa il conto con il proprio Profilo e il proprio stato.<\/li>\n<\/ul>", "data": "24/09/2026"};
+const BY = Object.fromEntries(D.argomenti.map(a => [a.id, a]));
+const ST = { "✖": ["st-no", "mai studiato"], "⚠": ["st-lac", "lacuna"], "◐": ["st-vis", "visto una volta"], "✓": ["st-ok", "verificato"], "?": ["st-nd", "da valutare"] };
+const LEZ = D.argomenti.some(a => a.lezione);
+const CRIT = new Set(D.blocchi.flatMap(b => b.critico));
+const NS = "http://www.w3.org/2000/svg";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const cmpId = (a, b) => { const [x1, y1] = a.split(".").map(Number), [x2, y2] = b.split(".").map(Number); return x1 - x2 || y1 - y2; };
+
+document.getElementById("sub").textContent =
+  `${D.data ? `Aggiornato il ${D.data} · ` : ""}${D.capitoli.length} capitoli · ${D.argomenti.length} argomenti · fonte: PROGRAMMA.md`;
+document.getElementById("quadroBox").innerHTML = D.quadro;
+{
+  const q = document.getElementById("quadroBox");
+  q.querySelectorAll("td").forEach(td => {
+    const s = td.textContent.trim();
+    if (ST[s]) td.innerHTML = `<span class="stato ${ST[s][0]}">${s} ${ST[s][1]}</span>`;
+    else if (/^(S|A|B|C)$/.test(s)) td.innerHTML = `<span class="pill ${s}">${s}</span>`;
+  });
+  const leg = document.createElement("div");
+  leg.className = "legend qleg";
+  leg.innerHTML = `<span><b>Stato</b></span>` + Object.entries(ST).map(([k, [c, t]]) => `<span class="stato ${c}">${k} ${t}</span>`).join("") +
+    `<span style="margin-left:12px"><b>Priorità</b></span><span><i class="pill S">S</i> esce quasi sempre, va saputo fare</span>
+     <span><i class="pill A">A</i> uscito o candidato forte</span><span><i class="pill B">B</i> raro, basta definizione e formula</span>
+     <span><i class="pill C">C</i> cultura</span>`;
+  q.querySelector(".tabwrap").after(leg);
+  // colonna calcolata: avanzamento per capitolo, dagli stati degli argomenti
+  const tab = q.querySelector("table");
+  tab.querySelector("thead tr").insertAdjacentHTML("beforeend", "<th>Avanzamento</th>");
+  tab.querySelectorAll("tbody tr").forEach(tr => {
+    const n = tr.cells[0].textContent.trim();
+    const args = /^\d+$/.test(n) ? D.argomenti.filter(a => a.cap === +n) : [];
+    if (!args.length) return tr.insertAdjacentHTML("beforeend", "<td></td>");
+    const segs = Object.keys(ST).filter(k => k !== "?").map(k => [k, args.filter(a => a.stato === k).length]);
+    const ok = args.filter(a => a.stato === "✓").length;
+    tr.insertAdjacentHTML("beforeend", `<td class="prog"><span class="bar">${segs.filter(x => x[1])
+      .map(([k, c]) => `<i class="${ST[k][0]}" style="width:${100 * c / args.length}%"></i>`).join("")}</span>✓ ${ok}/${args.length}</td>`);
+  });
+}
+
+/* ---------- Il tuo piano: dal Profilo di PROGRAMMA.md ---------- */
+{
+  const P = D.profilo || {};
+  if (Object.keys(P).length) {
+    document.getElementById("piano").classList.remove("hidden");
+    document.getElementById("navPiano").classList.remove("hidden");
+    const data = t => { const m = /(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(t || ""); return m ? new Date(+m[3], m[2] - 1, +m[1]) : null; };
+    const num = t => { const m = /\d+(?:[.,]\d+)?/.exec(t || ""); return m ? parseFloat(m[0].replace(",", ".")) : null; };
+    const campi = Object.entries(P).map(([k, v]) =>
+      `<dt>${esc(k)}</dt><dd>${v ? esc(v) : '<span class="vuoto">da compilare — chiedilo al tuo agente</span>'}</dd>`).join("");
+    // ore di studio che restano: ore del capitolo divise per peso della priorità, scalate per stato
+    const PESO = { S: 3, A: 2, B: 1, C: 0.3 }, RESTA = { "✓": 0, "◐": 0.5, "⚠": 0.8, "✖": 1, "?": 1 };
+    const incluse = new Set((P["Priorità incluse"] || "S, A, B, C").match(/[SABC]/g));
+    let studio = 0;
+    for (const c of D.capitoli) {
+      const args = D.argomenti.filter(a => a.cap === c.n), tot = args.reduce((s, a) => s + PESO[a.p], 0);
+      if (c.ore && tot) for (const a of args) if (incluse.has(a.p)) studio += c.ore * PESO[a.p] / tot * RESTA[a.stato];
+    }
+    const extra = num(P["Ore extra (teoria e simulazioni)"]) || 0, serve = studio + extra;
+    const oggi = new Date(); oggi.setHours(0, 0, 0, 0);
+    const inizio = data(P["Inizio"]) && data(P["Inizio"]) > oggi ? data(P["Inizio"]) : oggi;
+    const esame = data(P["Appello"]), h = num(P["Ore al giorno"]);
+    let v = `Servono circa <b>${Math.round(serve)} h</b>: ${Math.round(studio)} di studio (priorità ${[...incluse].join(", ")}, al netto di quello già fatto) + ${extra} di teoria e simulazioni.`;
+    if (esame && h) {
+      const giorni = Math.max(0, Math.round((esame - inizio) / 864e5)), disp = giorni * h;
+      const ok = disp >= serve;
+      v += `<br>Da ${inizio.toLocaleDateString("it-IT")} all'appello ci sono <b>${giorni} giorni</b> × ${h} h = <b>${Math.round(disp)} h</b>.
+        <span class="stato ${ok ? "st-ok" : "st-no"}">${ok ? `margine di ${Math.round(disp - serve)} h` : `mancano ${Math.round(serve - disp)} h`}</span>`;
+      if (!ok) v += `<br>Servirebbero ${Math.ceil(serve / Math.max(giorni, 1))} h al giorno, oppure escludere le priorità più basse.`;
+    } else v += `<br><span class="vuoto">Compila Appello e Ore al giorno per il confronto con il tempo disponibile.</span>`;
+    document.getElementById("pianoBox").innerHTML = `<dl class="kv">${campi}</dl><p class="verdetto">${v}</p>`;
+  }
+}
+document.getElementById("ordineBox").innerHTML = D.ordine;
+document.getElementById("tempoBox").innerHTML = D.tempo;
+
+/* ---------- Diagrammi: una fascia per capitolo, colonne = ordine di studio ---------- */
+function grafo(blocco) {
+  const caps = new Set(blocco.fasce.flatMap(f => f[1]).filter(c => c !== 0));
+  const shown = new Set(D.argomenti.filter(a => "SA".includes(a.p) && caps.has(a.cap)).map(a => a.id));
+  // capitolo 0: si include solo quello che serve, con la sua chiusura interna
+  let cresce = true;
+  while (cresce) {
+    cresce = false;
+    for (const id of [...shown]) for (const d of BY[id].dip)
+      if (BY[d].cap === 0 && !shown.has(d)) { shown.add(d); cresce = true; }
+  }
+  const ghost = new Set(), tutti = [];
+  for (const id of shown) for (const d of BY[id].dip) {
+    if (!shown.has(d)) ghost.add(d);
+    tutti.push([d, id]);
+  }
+  // riduzione transitiva: A→C non si disegna se c'è già A→…→C
+  const succ = {};
+  for (const [a, b] of tutti) (succ[a] = succ[a] || []).push(b);
+  const raggiunge = (da, a, salta) => {
+    const vis = new Set(), st = (succ[da] || []).filter(x => x !== salta);
+    while (st.length) {
+      const x = st.pop();
+      if (x === a) return true;
+      if (vis.has(x)) continue;
+      vis.add(x); st.push(...(succ[x] || []));
+    }
+    return false;
+  };
+  const edges = tutti.filter(([a, b]) => !raggiunge(a, b, b));
+  return { shown, ghost, edges, tutti };
+}
+
+function layout(g, blocco) {
+  const W = 150, H = 46, CW = 214, RH = 60, LBL = 170, PAD = 16, M = 16;
+  const nodes = [...g.shown, ...g.ghost];
+  const crit = new Set(blocco.critico);
+  const preds = Object.fromEntries(nodes.map(n => [n, []]));
+  const succ = Object.fromEntries(nodes.map(n => [n, []]));
+  for (const [a, b] of g.edges) { preds[b].push(a); succ[a].push(b); }
+  // colonna = quanto presto si può studiare (cammino più lungo dai prerequisiti)
+  const C = {};
+  const col = n => {
+    if (C[n] !== undefined) return C[n];
+    const rp = preds[n].filter(p => g.shown.has(p));
+    return (C[n] = Math.max(preds[n].some(p => g.ghost.has(p)) ? 1 : 0, ...rp.map(p => col(p) + 1)));
+  };
+  [...g.shown].forEach(col);
+  // fuori dal percorso critico: il più vicino possibile a chi lo usa, frecce più corte
+  for (const n of [...g.shown].sort((a, b) => C[b] - C[a]))
+    if (!crit.has(n) && succ[n].length) C[n] = Math.max(C[n], Math.min(...succ[n].map(s => C[s])) - 1);
+  for (const n of g.ghost) C[n] = Math.min(...succ[n].map(s => C[s])) - 1;
+  // fasce: quelle del blocco, più una in cima per i prerequisiti da altri capitoli
+  const fasce = blocco.fasce.map(([nome, caps]) => ({ nome, caps }));
+  const esterni = { nome: "Da altri capitoli", caps: [] };
+  const fasciaDi = n => fasce.find(f => f.caps.includes(BY[n].cap)) || esterni;
+  const tutte = [esterni, ...fasce];
+  const gruppi = new Map(); // fascia -> colonna -> [nodi]
+  for (const n of nodes) {
+    const f = fasciaDi(n);
+    if (!gruppi.has(f)) gruppi.set(f, {});
+    (gruppi.get(f)[C[n]] = gruppi.get(f)[C[n]] || []).push(n);
+  }
+  const usate = tutte.filter(f => gruppi.has(f));
+  for (const f of usate) for (const c in gruppi.get(f)) gruppi.get(f)[c].sort(cmpId);
+  const Y = {}, X = {}, bande = [];
+  const posiziona = () => {
+    let top = M;
+    bande.length = 0;
+    for (const f of usate) {
+      const gr = gruppi.get(f);
+      const righe = Math.max(...Object.values(gr).map(l => l.length));
+      const h = (righe - 1) * RH + H + 2 * PAD;
+      for (const c in gr) gr[c].forEach((n, i) => { Y[n] = top + PAD + i * RH; X[n] = LBL + c * CW; });
+      bande.push({ nome: f.nome, top, h });
+      top += h;
+    }
+    return top;
+  };
+  posiziona();
+  // dentro ogni fascia, ordina i nodi della stessa colonna verso i loro vicini
+  for (let it = 0; it < 8; it++) {
+    for (const f of usate) for (const c in gruppi.get(f)) {
+      const l = gruppi.get(f)[c];
+      const b = Object.fromEntries(l.map(n => {
+        const nb = [...preds[n], ...succ[n]];
+        return [n, nb.length ? nb.reduce((s, x) => s + Y[x], 0) / nb.length : Y[n]];
+      }));
+      // il percorso critico resta sulla prima riga della fascia: linea blu più dritta
+      l.sort((x, y) => (crit.has(y) - crit.has(x)) || (b[x] - b[y]));
+    }
+    posiziona();
+  }
+  const height = posiziona() + M;
+  const width = LBL + (Math.max(...nodes.map(n => C[n])) + 1) * CW - (CW - W) + M;
+  return { X, Y, W, H, width, height, bande, LBL, preds, succ };
+}
+
+/* zoom e spostamento: pizzico / ⌘+rotella per lo zoom, due dita o trascinamento per spostarsi */
+function panZoom(svg, wrap, W, H) {
+  let x = 0, y = 0, k = 1, mosso = false;
+  const applica = () => svg.setAttribute("viewBox", `${x} ${y} ${wrap.clientWidth / k} ${wrap.clientHeight / k}`);
+  const adatta = () => {
+    k = Math.min(wrap.clientWidth / W, wrap.clientHeight / H, 1.2);
+    x = -(wrap.clientWidth / k - W) / 2; y = -(wrap.clientHeight / k - H) / 2; applica();
+  };
+  const zoom = (f, cx, cy) => { // cx, cy: punto fermo in pixel del riquadro
+    const nk = Math.min(4, Math.max(0.15, k * f));
+    x += cx / k - cx / nk; y += cy / k - cy / nk; k = nk; applica();
+  };
+  wrap.addEventListener("wheel", e => {
+    e.preventDefault();
+    const r = wrap.getBoundingClientRect();
+    if (e.ctrlKey || e.metaKey) zoom(Math.exp(-e.deltaY * 0.01), e.clientX - r.left, e.clientY - r.top);
+    else { x += e.deltaX / k; y += e.deltaY / k; applica(); }
+  }, { passive: false });
+  const pt = new Map();
+  let ultimo = null;
+  wrap.addEventListener("pointerdown", e => {
+    pt.set(e.pointerId, [e.clientX, e.clientY]); mosso = false; ultimo = null;
+  });
+  wrap.addEventListener("pointermove", e => {
+    if (!pt.has(e.pointerId)) return;
+    const [px, py] = pt.get(e.pointerId);
+    if (pt.size === 1) {
+      const dx = e.clientX - px, dy = e.clientY - py;
+      if (!mosso && Math.hypot(dx, dy) < 4) return;
+      if (!mosso) wrap.setPointerCapture(e.pointerId);
+      mosso = true; x -= dx / k; y -= dy / k; applica();
+    } else if (pt.size === 2) {
+      const [a, b] = [...pt.values()];
+      const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+      if (ultimo) {
+        const r = wrap.getBoundingClientRect();
+        zoom(d / ultimo, (a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top);
+      }
+      ultimo = d; mosso = true;
+    }
+    pt.set(e.pointerId, [e.clientX, e.clientY]);
+  });
+  const fine = e => { pt.delete(e.pointerId); ultimo = null; };
+  wrap.addEventListener("pointerup", fine);
+  wrap.addEventListener("pointercancel", fine);
+  // dopo un trascinamento il clic non conta
+  wrap.addEventListener("click", e => { if (mosso) { e.stopPropagation(); mosso = false; } }, true);
+  new ResizeObserver(() => applica()).observe(wrap);
+  // altezza del riquadro: quella del diagramma a larghezza piena, entro il 68% dello schermo
+  const dimensiona = () => {
+    const k0 = Math.min(wrap.clientWidth / W, 1.2);
+    wrap.style.height = `${Math.round(Math.min(Math.max(H * k0 + 8, 220), innerHeight * 0.68))}px`;
+    adatta();
+  };
+  return {
+    adatta, dimensiona,
+    piu: () => zoom(1.25, wrap.clientWidth / 2, wrap.clientHeight / 2),
+    meno: () => zoom(0.8, wrap.clientWidth / 2, wrap.clientHeight / 2),
+  };
+}
+
+function disegna(blocco) {
+  const g = grafo(blocco), P = layout(g, blocco);
+  const crit = new Set(blocco.critico);
+  const svg = document.createElementNS(NS, "svg");
+  svg.classList.add("diag");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", `Grafo delle dipendenze: ${blocco.titolo}`);
+  const el = (tag, attrs, parent = svg) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    parent.appendChild(e); return e;
+  };
+  const gB = el("g", {}), gE = el("g", {}), gN = el("g", {});
+  P.bande.forEach((b, i) => {
+    el("rect", { x: 0, y: b.top, width: P.width, height: b.h, class: "banda" + (i % 2 ? " alt" : "") }, gB);
+    const t = el("text", { x: 14, y: b.top + 26, class: "banda-t" }, gB);
+    t.textContent = b.nome;
+  });
+  const occupato = (id, a, b) => Object.keys(P.X).some(n => n !== a && n !== b &&
+    Math.abs(P.Y[n] - P.Y[id]) < 1 && P.X[n] > P.X[a] && P.X[n] < P.X[b]);
+  const pathEls = [];
+  for (const [a, b] of g.edges) {
+    const sx = P.X[a] + P.W, sy = P.Y[a] + P.H / 2, tx = P.X[b], ty = P.Y[b] + P.H / 2;
+    const dx = Math.max(40, (tx - sx) / 2);
+    let d = `M${sx},${sy} C${sx + dx},${sy} ${tx - dx},${ty} ${tx},${ty}`;
+    // freccia lunga sulla stessa riga con riquadri in mezzo: passa sopra
+    if (Math.abs(sy - ty) < 1 && occupato(a, a, b)) {
+      const up = sy - P.H / 2 - 22;
+      d = `M${sx},${sy} C${sx + 30},${sy} ${sx + 10},${up} ${sx + 50},${up} L${tx - 50},${up} C${tx - 10},${up} ${tx - 30},${ty} ${tx},${ty}`;
+    }
+    const isC = crit.has(a) && crit.has(b);
+    const p = el("path", { d, class: "e" + (isC ? " crit" : "") }, gE);
+    p.dataset.a = a; p.dataset.b = b;
+    pathEls.push(p);
+  }
+  pathEls.filter(p => p.classList.contains("crit")).forEach(p => gE.appendChild(p));
+  const nodeEls = {};
+  for (const id in P.X) {
+    const a = BY[id], ghost = g.ghost.has(id);
+    const cls = ["node", ghost ? "ghost" : "", !ghost && crit.has(id) ? "crit" : ""].join(" ");
+    const gg = el("g", { class: cls, transform: `translate(${P.X[id]},${P.Y[id]})`, tabindex: 0 }, gN);
+    const sc = ST[a.stato][0].slice(3);
+    if (!ghost && crit.has(id)) el("rect", { class: "halo", x: -4, y: -4, width: P.W + 8, height: P.H + 8, rx: 11 }, gg);
+    const r = el("rect", { class: "b", width: P.W, height: P.H, rx: 8 }, gg);
+    if (!ghost) { r.style.fill = `var(--${sc}-bg)`; r.style.stroke = `var(--${sc})`; }
+    const t1 = el("text", { x: 9, y: 18, class: "id" }, gg);
+    t1.textContent = ghost ? `${id} · cap ${a.cap}` : `${id} · ${a.p}`;
+    if (!ghost) el("circle", { cx: P.W - 12, cy: 13, r: 4.5 }, gg).style.fill = `var(--${sc})`;
+    el("text", { x: 9, y: 36 }, gg).textContent = a.breve;
+    el("title", {}, gg).textContent = `${id} — ${a.testo.replace(/\*\*/g, "")}`;
+    nodeEls[id] = gg;
+    gg.addEventListener("click", ev => { ev.stopPropagation(); focus(id); });
+    gg.addEventListener("keydown", ev => { if (ev.key === "Enter") focus(id); });
+  }
+  const box = document.createElement("div");
+  box.className = "card";
+  box.innerHTML = `<div class="dhead"><div><h3>${esc(blocco.titolo)}</h3>
+    <p class="sub" style="margin:4px 0 10px">${esc(blocco.nota)}</p></div>
+    <div class="zoom"><button class="chip" data-z="meno" aria-label="Riduci">−</button>
+    <button class="chip" data-z="piu" aria-label="Ingrandisci">+</button>
+    <button class="chip" data-z="adatta">Adatta</button></div></div>`;
+  const wrap = document.createElement("div");
+  wrap.className = "diagwrap"; wrap.appendChild(svg);
+  const info = document.createElement("div");
+  info.className = "info"; info.textContent = "Clicca un riquadro per i dettagli.";
+  box.append(wrap, info);
+  const pz = panZoom(svg, wrap, P.width, P.height);
+  box.querySelectorAll("[data-z]").forEach(b => b.addEventListener("click", () => pz[b.dataset.z]()));
+  requestAnimationFrame(pz.dimensiona);
+  // prerequisiti e sblocchi: sul grafo completo, non su quello ridotto
+  const fullP = {}, fullS = {};
+  for (const [a, b] of g.tutti) { (fullP[b] = fullP[b] || []).push(a); (fullS[a] = fullS[a] || []).push(b); }
+  let current = null;
+  function reach(id, nb) {
+    const out = new Set([id]), st = [id];
+    while (st.length) for (const x of nb[st.pop()] || []) if (!out.has(x)) { out.add(x); st.push(x); }
+    return out;
+  }
+  function focus(id) {
+    if (current === id) return clear();
+    current = id;
+    const pre = reach(id, fullP), post = reach(id, fullS), on = new Set([...pre, ...post]);
+    svg.classList.add("focus");
+    for (const n in nodeEls) nodeEls[n].classList.toggle("on", on.has(n));
+    for (const p of pathEls) p.classList.toggle("on",
+      (pre.has(p.dataset.a) && pre.has(p.dataset.b)) || (post.has(p.dataset.a) && post.has(p.dataset.b)));
+    const a = BY[id];
+    info.innerHTML = `<b>${id} — ${a.html}</b><br>Priorità ${a.p} · <span class="stato ${ST[a.stato][0]}">${esc(a.stato_testo)}</span>
+      · esce: ${esc(a.slot)}${a.lezione ? ` · lezione: ${esc(a.lezione)}` : ""}<br>Richiede ${pre.size - 1} argomenti, ne sblocca ${post.size - 1}.
+      <a href="#r-${id}">Vai alla riga ↓</a>`;
+  }
+  function clear() {
+    current = null; svg.classList.remove("focus");
+    info.textContent = "Clicca un riquadro per i dettagli.";
+  }
+  svg.addEventListener("click", clear);
+  return box;
+}
+const dBox = document.getElementById("diagrammi");
+D.blocchi.forEach(b => dBox.appendChild(disegna(b)));
+
+/* ---------- Tabelle per capitolo con filtri ---------- */
+const filtro = { p: new Set(["S", "A", "B", "C"]), s: new Set(Object.keys(ST)), crit: false };
+const fBox = document.getElementById("filtri");
+function chips(label, items, set, fmt) {
+  const s = document.createElement("span"); s.className = "lbl"; s.textContent = label; fBox.appendChild(s);
+  for (const it of items) {
+    const b = document.createElement("button"); b.className = "chip"; b.setAttribute("aria-pressed", "true");
+    b.innerHTML = fmt(it);
+    b.onclick = () => { set.has(it) ? set.delete(it) : set.add(it); b.setAttribute("aria-pressed", set.has(it)); applica(); };
+    fBox.appendChild(b);
+  }
+}
+chips("Priorità", ["S", "A", "B", "C"], filtro.p, x => `<span class="pill ${x}">${x}</span>`);
+chips("Stato", Object.keys(ST), filtro.s, x => `${x} ${ST[x][1]}`);
+const cb = document.createElement("button"); cb.className = "chip on-crit"; cb.setAttribute("aria-pressed", "false");
+cb.textContent = "● solo percorso critico";
+cb.onclick = () => { filtro.crit = !filtro.crit; cb.setAttribute("aria-pressed", filtro.crit); applica(); };
+fBox.appendChild(cb);
+
+const capBox = document.getElementById("capBox");
+for (const c of D.capitoli) {
+  const args = D.argomenti.filter(a => a.cap === c.n);
+  const sec = document.createElement("div");
+  sec.className = "card cap"; sec.id = `cap-${c.n}`;
+  sec.innerHTML = `<h3><span class="n">Cap ${c.n}</span>${esc(c.titolo)}</h3><div class="intro">${c.intro_html}</div>
+  <div class="tabwrap"><table><thead><tr><th>ID</th><th>Argomento</th><th>P</th><th>Dipende da</th><th>Esce</th><th>Stato</th>${LEZ ? "<th>Lezione</th>" : ""}</tr></thead><tbody>
+  ${args.map(a => `<tr id="r-${a.id}" data-p="${a.p}" data-s="${a.stato}" class="${CRIT.has(a.id) ? "crit" : ""}">
+    <td class="id">${a.id}</td><td>${a.html}</td><td><span class="pill ${a.p}">${a.p}</span></td>
+    <td>${a.dip.length ? a.dip.map(d => `<a class="dep" href="#r-${d}">${d}</a>`).join("") : "—"}
+      ${/\(/.test(a.dip_testo) ? `<br><small>${esc(a.dip_testo.replace(/^[^(]*/, ""))}</small>` : ""}</td>
+    <td>${esc(a.slot)}</td><td><span class="stato ${ST[a.stato][0]}">${esc(a.stato_testo)}</span></td>${LEZ ? `<td>${esc(a.lezione)}</td>` : ""}</tr>`).join("")}
+  </tbody></table></div>`;
+  capBox.appendChild(sec);
+}
+function applica() {
+  for (const sec of capBox.children) {
+    let vis = 0;
+    for (const tr of sec.querySelectorAll("tbody tr")) {
+      const ok = filtro.p.has(tr.dataset.p) && filtro.s.has(tr.dataset.s) && (!filtro.crit || tr.classList.contains("crit"));
+      tr.classList.toggle("hidden", !ok); vis += ok;
+    }
+    sec.classList.toggle("hidden", !vis);
+  }
+}
+</script>
+</body>
+</html>

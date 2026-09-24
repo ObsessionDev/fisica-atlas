@@ -1,4 +1,4 @@
-# Fisica — dashboard di studio (Ing. Informatica, Sapienza)
+# fisica-atlas — il programma di Fisica come mappa di studio (Ing. Informatica, Sapienza)
 
 Il programma dello scritto di Fisica in **12 capitoli e 84 argomenti**, con le dipendenze tra gli
 argomenti, le priorità ricavate dagli ultimi 8 scritti (giugno 2025 – luglio 2026) e i percorsi di
@@ -20,8 +20,8 @@ Requisiti: un browser. Per il piano personale anche **Python 3.8+** e un agente
 (Claude Code, Codex, Gemini CLI, Cursor o simili).
 
 ```
-git clone <url-di-questo-repo> fisica-dashboard
-cd fisica-dashboard
+git clone https://github.com/ObsessionDev/fisica-atlas.git
+cd fisica-atlas
 ```
 
 Oppure scarica lo zip (*Code → Download ZIP*) ed estrailo.

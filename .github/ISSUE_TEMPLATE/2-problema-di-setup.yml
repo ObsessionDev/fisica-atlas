@@ -1,0 +1,56 @@
+name: Problema di installazione o di uso
+description: La dashboard non si apre o non si aggiorna, l'agente non parte o non segue AGENTS.md, un comando dà errore.
+title: "[setup] "
+labels: ["setup"]
+body:
+  - type: dropdown
+    id: sistema
+    attributes:
+      label: Sistema operativo
+      options:
+        - macOS
+        - Windows
+        - Linux
+    validations:
+      required: true
+  - type: dropdown
+    id: agente
+    attributes:
+      label: Con cosa lo usi
+      options:
+        - Solo la dashboard, senza agente
+        - Claude Code
+        - Codex
+        - Gemini CLI
+        - Cursor
+        - Altro
+    validations:
+      required: true
+  - type: textarea
+    id: passi
+    attributes:
+      label: Cosa hai fatto
+      description: I passi, uno per riga, in modo che si possa rifarli.
+      placeholder: |
+        1. ho scaricato lo zip
+        2. ho aperto dashboard.html con doppio clic
+    validations:
+      required: true
+  - type: textarea
+    id: risultato
+    attributes:
+      label: Cosa è successo, e cosa ti aspettavi
+    validations:
+      required: true
+  - type: textarea
+    id: errore
+    attributes:
+      label: Messaggio di errore (se c'è)
+      description: Incollalo così com'è. Controlla prima che non contenga percorsi o nomi che non vuoi rendere pubblici.
+      render: shell
+  - type: input
+    id: python
+    attributes:
+      label: Versione di Python (se usi l'agente)
+      description: L'output di `python3 --version`.
+      placeholder: "es. Python 3.12.4"

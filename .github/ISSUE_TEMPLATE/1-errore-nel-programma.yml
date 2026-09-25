@@ -1,0 +1,43 @@
+name: Errore nel programma
+description: Un argomento sbagliato, mancante o di troppo, una dipendenza, una priorità o una stima di ore che non torna.
+title: "[programma] "
+labels: ["programma"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Grazie! Un errore segnalato bene migliora la mappa per tutto il corso.
+        Non serve incollare il tuo stato di studio: basta l'argomento e cosa non torna.
+  - type: input
+    id: argomento
+    attributes:
+      label: Argomento
+      description: L'ID e il nome, come in PROGRAMMA.md o nella dashboard.
+      placeholder: "es. 6.3 — Legge di Gauss"
+    validations:
+      required: true
+  - type: dropdown
+    id: tipo
+    attributes:
+      label: Che tipo di errore è
+      options:
+        - Una dipendenza sbagliata o mancante
+        - Una priorità (S, A, B, C) che non torna
+        - Un argomento che manca o che non c'entra
+        - Le ore stimate
+        - Un refuso o una formula sbagliata
+        - Altro
+    validations:
+      required: true
+  - type: textarea
+    id: descrizione
+    attributes:
+      label: Cosa non torna, e come dovrebbe essere
+    validations:
+      required: true
+  - type: input
+    id: fonte
+    attributes:
+      label: Da dove lo sai (facoltativo)
+      description: Uno scritto d'esame con la data, la dispensa, il programma del docente, una lezione.
+      placeholder: "es. scritto del 12/01/26, esercizio 3"

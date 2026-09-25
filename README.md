@@ -67,6 +67,14 @@ python3 strumenti/genera_programma_html.py
 `AGENTS.md` lo leggono da soli Codex, Cursor e altri; `CLAUDE.md` e `GEMINI.md` rimandano lì per
 Claude Code e Gemini CLI. Con altri strumenti basta dire: "leggi AGENTS.md e seguilo".
 
+## Segnalare un problema
+
+Hai trovato un errore nel programma, la dashboard non funziona o hai un'idea? Apri una
+[issue](https://github.com/ObsessionDev/fisica-atlas/issues/new/choose) e scegli il modulo giusto:
+**errore nel programma**, **problema di installazione o di uso**, **idea o miglioramento**.
+Serve un account GitHub gratuito. Non incollare il tuo stato di studio né dati personali: le issue
+sono pubbliche.
+
 ## Privacy
 
 Il tuo stato resta in `PROGRAMMA.md`, sul tuo computer. Se fai un fork **pubblico** e ci spingi le

@@ -1,0 +1,16 @@
+name: Idea o miglioramento
+description: Una funzione che ti servirebbe, o un modo per rendere la mappa più utile.
+title: "[idea] "
+labels: ["idea"]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Cosa ti serve
+      description: Il problema che hai mentre studi, più che la soluzione.
+    validations:
+      required: true
+  - type: textarea
+    id: proposta
+    attributes:
+      label: Come te lo immagini (facoltativo)

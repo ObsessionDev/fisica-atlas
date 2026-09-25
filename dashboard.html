@@ -327,13 +327,23 @@ function layout(g, blocco) {
 /* zoom e spostamento: pizzico / ⌘+rotella per lo zoom, due dita o trascinamento per spostarsi */
 function panZoom(svg, wrap, W, H) {
   let x = 0, y = 0, k = 1, mosso = false;
-  const applica = () => svg.setAttribute("viewBox", `${x} ${y} ${wrap.clientWidth / k} ${wrap.clientHeight / k}`);
+  const M = 20; // margine oltre il bordo del diagramma, in unità del disegno
+  // zoom minimo: quello che mostra tutto il diagramma
+  const kMin = () => Math.min(wrap.clientWidth / W, wrap.clientHeight / H, 1.2);
+  // su ogni asse: centrato se ci sta tutto, altrimenti fermo ai bordi
+  const limita = (v, vis, L) => vis >= L + 2 * M ? -(vis - L) / 2 : Math.min(Math.max(v, -M), L + M - vis);
+  const applica = () => {
+    k = Math.max(k, kMin());
+    const vw = wrap.clientWidth / k, vh = wrap.clientHeight / k;
+    x = limita(x, vw, W); y = limita(y, vh, H);
+    svg.setAttribute("viewBox", `${x} ${y} ${vw} ${vh}`);
+  };
   const adatta = () => {
-    k = Math.min(wrap.clientWidth / W, wrap.clientHeight / H, 1.2);
+    k = kMin();
     x = -(wrap.clientWidth / k - W) / 2; y = -(wrap.clientHeight / k - H) / 2; applica();
   };
   const zoom = (f, cx, cy) => { // cx, cy: punto fermo in pixel del riquadro
-    const nk = Math.min(4, Math.max(0.15, k * f));
+    const nk = Math.min(4, Math.max(kMin(), k * f));
     x += cx / k - cx / nk; y += cy / k - cy / nk; k = nk; applica();
   };
   wrap.addEventListener("wheel", e => {

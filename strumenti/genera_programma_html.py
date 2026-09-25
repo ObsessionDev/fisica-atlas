@@ -45,7 +45,7 @@ ETICHETTE = {
     "10.1": "P, D, dielettrici", "11.1": "M, H, Ampère materia",
 }
 
-# Blocchi dei diagrammi: fasce (una per capitolo) e percorso critico.
+# Blocchi dei diagrammi: fasce (capitoli, o singoli argomenti per dividere un capitolo) e percorso critico.
 # Meccanica e termo sono separati: la termo dipende dalla meccanica solo per 2.6.
 # L'E/M resta intero: circuiti e magnetismo si agganciano all'elettrostatica in troppi punti.
 BLOCCHI = [
@@ -59,7 +59,8 @@ BLOCCHI = [
     },
     {
         "id": "termo", "titolo": "Termodinamica",
-        "fasce": [["Termodinamica", [5]]],
+        "fasce": [["I principio, gas e cicli", ["5.1", "5.2", "5.3", "5.4", "5.5", "5.6", "5.7", "5.8", "5.9"]],
+                  ["II principio ed entropia", ["5.10", "5.11", "5.12", "5.13", "5.14"]]],
         "critico": ["5.4", "5.5", "5.6", "5.7", "5.8", "5.10", "5.11", "5.12", "5.13"],
         "nota": "Percorso critico: dalle trasformazioni all'entropia con irreversibili — "
                 "l'esercizio che esce a ogni esame.",

@@ -130,7 +130,7 @@ tr:target td { background: var(--crit-soft); }
   <section id="percorsi">
     <h2>Percorsi di studio</h2>
     <p class="sub">Solo argomenti S e A. Le frecce vanno dal prerequisito all'argomento che ne dipende.
-      Ogni fascia è un capitolo; da sinistra a destra, l'ordine in cui si possono studiare. Sono disegnate solo le dipendenze dirette.<br>Pizzico o ⌘ + rotella per lo zoom, due dita o trascinamento per spostarti. Clicca un riquadro per vedere tutto ciò che richiede e tutto ciò che sblocca.</p>
+      Ogni fascia è un capitolo, o una sua parte; da sinistra a destra, l'ordine in cui si possono studiare. Sono disegnate solo le dipendenze dirette.<br>Pizzico o ⌘ + rotella per lo zoom, due dita o trascinamento per spostarti. Clicca un riquadro per vedere tutto ciò che richiede e tutto ciò che sblocca.</p>
     <div class="legend">
       <span><i class="sw st-no"></i>mai studiato</span><span><i class="sw st-lac"></i>lacuna confermata</span>
       <span><i class="sw st-vis"></i>visto una volta</span><span><i class="sw st-ok"></i>verificato</span><span><i class="sw st-nd"></i>da valutare</span>
@@ -181,7 +181,10 @@ document.getElementById("quadroBox").innerHTML = D.quadro;
   tab.querySelector("thead tr").insertAdjacentHTML("beforeend", "<th>Avanzamento</th>");
   tab.querySelectorAll("tbody tr").forEach(tr => {
     const n = tr.cells[0].textContent.trim();
-    const args = /^\d+$/.test(n) ? D.argomenti.filter(a => a.cap === +n) : [];
+    // riga di una parte di capitolo: il titolo porta l'intervallo, es. "(5.1–5.9)"
+    const parte = (tr.cells[1] || {}).textContent?.match(/\((\d+)\.(\d+)–\d+\.(\d+)\)/);
+    const args = !/^\d+$/.test(n) ? [] : D.argomenti.filter(a => a.cap === +n &&
+      (!parte || (+a.id.split(".")[1] >= +parte[2] && +a.id.split(".")[1] <= +parte[3])));
     if (!args.length) return tr.insertAdjacentHTML("beforeend", "<td></td>");
     const segs = Object.keys(ST).filter(k => k !== "?").map(k => [k, args.filter(a => a.stato === k).length]);
     const ok = args.filter(a => a.stato === "✓").length;
@@ -228,7 +231,7 @@ document.getElementById("tempoBox").innerHTML = D.tempo;
 
 /* ---------- Diagrammi: una fascia per capitolo, colonne = ordine di studio ---------- */
 function grafo(blocco) {
-  const caps = new Set(blocco.fasce.flatMap(f => f[1]).filter(c => c !== 0));
+  const caps = new Set(blocco.fasce.flatMap(f => f[1]).map(c => typeof c === "string" ? BY[c].cap : c).filter(c => c !== 0));
   const shown = new Set(D.argomenti.filter(a => "SA".includes(a.p) && caps.has(a.cap)).map(a => a.id));
   // capitolo 0: si include solo quello che serve, con la sua chiusura interna
   let cresce = true;
@@ -281,7 +284,7 @@ function layout(g, blocco) {
   // fasce: quelle del blocco, più una in cima per i prerequisiti da altri capitoli
   const fasce = blocco.fasce.map(([nome, caps]) => ({ nome, caps }));
   const esterni = { nome: "Da altri capitoli", caps: [] };
-  const fasciaDi = n => fasce.find(f => f.caps.includes(BY[n].cap)) || esterni;
+  const fasciaDi = n => fasce.find(f => f.caps.includes(n)) || fasce.find(f => f.caps.includes(BY[n].cap)) || esterni;
   const tutte = [esterni, ...fasce];
   const gruppi = new Map(); // fascia -> colonna -> [nodi]
   for (const n of nodes) {

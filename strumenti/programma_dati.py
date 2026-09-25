@@ -50,7 +50,9 @@ def leggi(percorso=RADICE / "PROGRAMMA.md"):
             if sez == "Quadro d'insieme" and re.match(r"^\d+$", r.get("Cap", "")):
                 col = next((k for k in testa if k.lower().startswith("ore")), None)
                 if col:
-                    ore[int(r["Cap"])] = numero(r[col])
+                    # un capitolo diviso in più righe somma le ore
+                    n = int(r["Cap"])
+                    ore[n] = (ore.get(n) or 0) + (numero(r[col]) or 0)
             elif cap is not None and "ID" in r:
                 stato = (r.get("Stato") or "?").strip() or "?"
                 argomenti.append({

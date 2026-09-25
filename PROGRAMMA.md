@@ -1,6 +1,6 @@
 # Programma di Fisica — capitoli, dipendenze, priorità
 
-Fisica per Ingegneria Informatica (Sapienza). Aggiornato il 24/09/2026.
+Fisica per Ingegneria Informatica (Sapienza). Aggiornato il 25/09/2026.
 Fonti: programma svolto del corso, dispense degli argomenti aggiuntivi 2026 (§1–13),
 analisi degli 8 scritti da giugno 2025 a luglio 2026.
 
@@ -53,7 +53,8 @@ La pagina `dashboard.html` si genera da qui: vedi `README.md` e `AGENTS.md`.
 | 2 | Dinamica del punto | E1, T-MT (2/8) | S | 4 |
 | 3 | Sistemi e corpo rigido | E1 (4/8), T-MT (2/8) | **S** | 7 |
 | 4 | Fluidi | T-MT (2/8) | A | 2,5 |
-| 5 | Termodinamica | **E2 (8/8)**, T-MT (2/8) | **S** | 8 |
+| 5 | Termodinamica: I principio, gas e cicli (5.1–5.9) | **E2 (8/8)** | **S** | 4,5 |
+| 5 | Termodinamica: II principio ed entropia (5.10–5.14) | E2 (ΔS 3/8), T-MT (2/8) | **S** | 3,5 |
 | 6 | Elettrostatica nel vuoto | E3 (4/8) | **S** | 8 |
 | 7 | Correnti | E3 (2/8), T-EM (2/8) | S | 3 |
 | 8 | Magnetismo e induzione | E3 (2/8), T-EM (3/8) | **S** | 9 |

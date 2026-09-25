@@ -326,18 +326,39 @@ function layout(g, blocco) {
 
 /* zoom e spostamento: pizzico / ⌘+rotella per lo zoom, due dita o trascinamento per spostarsi */
 function panZoom(svg, wrap, W, H) {
-  let x = 0, y = 0, k = 1, mosso = false;
+  let x = 0, y = 0, k = 1, mosso = false, anim = 0, attesa = 0;
   const M = 20; // margine oltre il bordo del diagramma, in unità del disegno
+  const R = () => 45 / k; // oltre il bordo si va al massimo di 45 px, sempre più lenti
   // zoom minimo: quello che mostra tutto il diagramma
   const kMin = () => Math.min(wrap.clientWidth / W, wrap.clientHeight / H, 1.2);
-  // su ogni asse: centrato se ci sta tutto, altrimenti fermo ai bordi
-  const limita = (v, vis, L) => vis >= L + 2 * M ? -(vis - L) / 2 : Math.min(Math.max(v, -M), L + M - vis);
+  // su ogni asse: centrato se ci sta tutto, altrimenti tra i bordi
+  const bordi = (vis, L) => vis >= L + 2 * M ? [-(vis - L) / 2, -(vis - L) / 2] : [-M, L + M - vis];
+  // elastico: oltre il bordo il diagramma segue lo spostamento sempre meno
+  const molla = (v, [lo, hi], r) => v < lo ? lo - r * (lo - v) / (lo - v + r) : v > hi ? hi + r * (v - hi) / (v - hi + r) : v;
+  const vista = () => { k = Math.max(k, kMin()); return [wrap.clientWidth / k, wrap.clientHeight / k]; };
+  const mostra = (vx, vy, vw, vh) => svg.setAttribute("viewBox", `${vx} ${vy} ${vw} ${vh}`);
   const applica = () => {
-    k = Math.max(k, kMin());
-    const vw = wrap.clientWidth / k, vh = wrap.clientHeight / k;
-    x = limita(x, vw, W); y = limita(y, vh, H);
-    svg.setAttribute("viewBox", `${x} ${y} ${vw} ${vh}`);
+    const [vw, vh] = vista();
+    mostra(molla(x, bordi(vw, W), R()), molla(y, bordi(vh, H), R()), vw, vh);
   };
+  // al rilascio il diagramma torna dentro i bordi
+  const rientra = () => {
+    cancelAnimationFrame(anim); clearTimeout(attesa);
+    const [vw, vh] = vista(), bx = bordi(vw, W), by = bordi(vh, H);
+    x = molla(x, bx, R()); y = molla(y, by, R()); // si riparte da dove si vede
+    const tx = Math.min(Math.max(x, bx[0]), bx[1]), ty = Math.min(Math.max(y, by[0]), by[1]);
+    if (x === tx && y === ty) return;
+    // ritorno in 200 ms, con partenza e arrivo morbidi
+    const x0 = x, y0 = y, t0 = performance.now();
+    const passo = t => {
+      const u = Math.min(1, (t - t0) / 200), e = (1 - Math.cos(Math.PI * u)) / 2;
+      x = x0 + (tx - x0) * e; y = y0 + (ty - y0) * e;
+      mostra(x, y, vw, vh);
+      if (u < 1) anim = requestAnimationFrame(passo);
+    };
+    anim = requestAnimationFrame(passo);
+  };
+  const ferma = () => { cancelAnimationFrame(anim); clearTimeout(attesa); };
   const adatta = () => {
     k = kMin();
     x = -(wrap.clientWidth / k - W) / 2; y = -(wrap.clientHeight / k - H) / 2; applica();
@@ -347,15 +368,22 @@ function panZoom(svg, wrap, W, H) {
     x += cx / k - cx / nk; y += cy / k - cy / nk; k = nk; applica();
   };
   wrap.addEventListener("wheel", e => {
-    e.preventDefault();
+    e.preventDefault(); ferma();
     const r = wrap.getBoundingClientRect();
     if (e.ctrlKey || e.metaKey) zoom(Math.exp(-e.deltaY * 0.01), e.clientX - r.left, e.clientY - r.top);
-    else { x += e.deltaX / k; y += e.deltaY / k; applica(); }
+    else {
+      x += e.deltaX / k; y += e.deltaY / k;
+      // oltre il bordo la molla tira indietro a ogni evento: l'inerzia del trackpad non spinge fuori
+      const [vw, vh] = vista(), bx = bordi(vw, W), by = bordi(vh, H);
+      const tira = (v, [lo, hi]) => v < lo ? lo + (v - lo) * 0.7 : v > hi ? hi + (v - hi) * 0.7 : v;
+      x = tira(x, bx); y = tira(y, by); applica();
+    }
+    attesa = setTimeout(rientra, 80); // rotella ferma: si rientra
   }, { passive: false });
   const pt = new Map();
   let ultimo = null;
   wrap.addEventListener("pointerdown", e => {
-    pt.set(e.pointerId, [e.clientX, e.clientY]); mosso = false; ultimo = null;
+    ferma(); pt.set(e.pointerId, [e.clientX, e.clientY]); mosso = false; ultimo = null;
   });
   wrap.addEventListener("pointermove", e => {
     if (!pt.has(e.pointerId)) return;
@@ -376,7 +404,7 @@ function panZoom(svg, wrap, W, H) {
     }
     pt.set(e.pointerId, [e.clientX, e.clientY]);
   });
-  const fine = e => { pt.delete(e.pointerId); ultimo = null; };
+  const fine = e => { pt.delete(e.pointerId); ultimo = null; if (!pt.size) rientra(); };
   wrap.addEventListener("pointerup", fine);
   wrap.addEventListener("pointercancel", fine);
   // dopo un trascinamento il clic non conta
@@ -390,8 +418,8 @@ function panZoom(svg, wrap, W, H) {
   };
   return {
     adatta, dimensiona,
-    piu: () => zoom(1.25, wrap.clientWidth / 2, wrap.clientHeight / 2),
-    meno: () => zoom(0.8, wrap.clientWidth / 2, wrap.clientHeight / 2),
+    piu: () => { zoom(1.25, wrap.clientWidth / 2, wrap.clientHeight / 2); rientra(); },
+    meno: () => { zoom(0.8, wrap.clientWidth / 2, wrap.clientHeight / 2); rientra(); },
   };
 }
 
